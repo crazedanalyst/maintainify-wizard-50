@@ -1,10 +1,9 @@
-
 import { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/AppContext';
 import { getRelativeTime, formatDate, getPriorityLevel, getPriorityColor, groupTasksByPriority } from '@/lib/utils';
-import { CalendarClock, Package, FileText, Tool } from 'lucide-react';
+import { CalendarClock, Package, FileText, Wrench } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -18,7 +17,6 @@ const Dashboard = () => {
     trialInfo
   } = useApp();
   
-  // Filter items for the selected property
   const propertyTasks = selectedProperty
     ? maintenanceTasks.filter(task => task.propertyId === selectedProperty.id)
     : [];
@@ -27,23 +25,19 @@ const Dashboard = () => {
     ? warranties.filter(warranty => warranty.propertyId === selectedProperty.id)
     : [];
   
-  // Group tasks by priority
   const tasksByPriority = groupTasksByPriority(propertyTasks);
   
-  // Count expiring warranties (expiring in the next 30 days)
   const now = Date.now();
   const expiringWarranties = propertyWarranties.filter(
     warranty => warranty.expiryDate > now && warranty.expiryDate < now + 30 * 24 * 60 * 60 * 1000
   );
   
-  // Count expired warranties
   const expiredWarranties = propertyWarranties.filter(
     warranty => warranty.expiryDate < now
   );
   
   return (
     <Layout>
-      {/* Trial notification */}
       {trialInfo.isActive && (
         <div className="animate-fade-in mb-6 p-4 rounded-lg bg-gradient-to-r from-brand-500 to-brand-600 text-white">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
@@ -70,7 +64,6 @@ const Dashboard = () => {
             <p className="text-gray-500">{selectedProperty.address}</p>
           </div>
           
-          {/* Summary cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <SummaryCard 
               title="Upcoming Tasks" 
@@ -84,7 +77,7 @@ const Dashboard = () => {
               title="Total Tasks" 
               value={propertyTasks.length.toString()} 
               description="Maintenance items"
-              icon={<Tool className="h-5 w-5" />}
+              icon={<Wrench className="h-5 w-5" />}
               iconColor="text-blue-500"
               bgColor="bg-blue-50"
             />
@@ -106,7 +99,6 @@ const Dashboard = () => {
             />
           </div>
           
-          {/* Task priorities */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Maintenance Tasks</h2>
@@ -156,7 +148,6 @@ const Dashboard = () => {
             </div>
           </div>
           
-          {/* Warranties */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Warranty Status</h2>

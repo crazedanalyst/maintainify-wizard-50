@@ -5,7 +5,7 @@ import {
   Home, 
   Calendar, 
   FileText, 
-  Tool, 
+  Wrench, // Replaced Tool with Wrench
   Users, 
   Settings, 
   ChevronLeft,
@@ -41,7 +41,7 @@ const Sidebar = ({ open, setOpen }: SidebarProps) => {
     { icon: Home, label: 'Dashboard', path: '/' },
     { icon: Calendar, label: 'Maintenance', path: '/maintenance' },
     { icon: FileText, label: 'Warranties', path: '/warranties' },
-    { icon: Tool, label: 'Service Providers', path: '/providers' },
+    { icon: Wrench, label: 'Service Providers', path: '/providers' }, // Updated icon here
     { icon: Users, label: 'Accounts', path: '/accounts' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
