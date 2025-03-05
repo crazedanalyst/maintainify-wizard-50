@@ -57,6 +57,7 @@ const MaintenanceLogForm = ({ taskId, propertyId, onComplete, onCancel }: Mainte
       const costValue = parseFloat(cost) || 0;
       
       await completeMaintenanceTask(taskId, {
+        taskId, // Add the missing taskId property
         propertyId,
         completedDate: completedDate.getTime(),
         cost: costValue,
