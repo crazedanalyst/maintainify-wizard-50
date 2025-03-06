@@ -297,17 +297,10 @@ const Maintenance = () => {
                     />
                   </CardContent>
                 ) : (
-                  <div className="flex items-center justify-center h-full p-8 text-center">
-                    <div className="max-w-md">
-                      <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">Select a task to view details</h3>
-                      <p className="text-gray-500 mb-4">
-                        Click on any task from the list to view its details, or add a new maintenance task.
-                      </p>
-                      <Button onClick={() => setIsAddingTask(true)}>
-                        <Plus className="h-4 w-4 mr-2" /> Add New Task
-                      </Button>
-                    </div>
+                  <div className="flex items-center justify-center h-full p-8">
+                    <Button onClick={() => setIsAddingTask(true)}>
+                      <Plus className="h-4 w-4 mr-2" /> Add New Task
+                    </Button>
                   </div>
                 )}
               </Card>
