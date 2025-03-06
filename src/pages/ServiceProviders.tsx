@@ -7,8 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search, Plus, Phone, Mail, Globe, Star } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@radix-ui/react-dialog';
-import ServiceProviderForm from '@/components/ServiceProviderForm';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import ServiceProviderForm from '@/components/providers/ServiceProviderForm';
 
 const ServiceProviders = () => {
   const { serviceProviders } = useApp();
@@ -16,12 +22,10 @@ const ServiceProviders = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
-  // Get unique categories from all service providers
   const allCategories = Array.from(
     new Set(serviceProviders.flatMap(provider => provider.category))
   );
   
-  // Apply search and category filters
   const filteredProviders = serviceProviders.filter(provider => {
     const matchesSearch = searchTerm === '' || 
       provider.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -33,7 +37,6 @@ const ServiceProviders = () => {
     return matchesSearch && matchesCategory;
   });
   
-  // Sort by rating (highest first)
   filteredProviders.sort((a, b) => b.rating - a.rating);
 
   return (
@@ -43,7 +46,6 @@ const ServiceProviders = () => {
         <p className="text-gray-500">Manage your service provider contacts and reviews</p>
       </div>
       
-      {/* Search and filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -81,7 +83,6 @@ const ServiceProviders = () => {
         </Button>
       </div>
       
-      {/* Provider listings */}
       {filteredProviders.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredProviders.map(provider => (
@@ -101,7 +102,6 @@ const ServiceProviders = () => {
         </div>
       )}
 
-      {/* Add Provider Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
@@ -120,9 +120,7 @@ const ServiceProviders = () => {
   );
 };
 
-// Service provider card component
 const ServiceProviderCard = ({ provider }: { provider: ServiceProvider }) => {
-  // Generate star rating
   const renderStars = (rating: number) => {
     return Array(5).fill(0).map((_, i) => (
       <Star 
