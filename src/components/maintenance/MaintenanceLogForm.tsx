@@ -124,14 +124,15 @@ const MaintenanceLogForm = ({ taskId, propertyId, onComplete, onCancel }: Mainte
       <div className="space-y-2">
         <label className="text-sm font-medium">Service Provider</label>
         <Select 
-          value={serviceProviderId || ''} 
+          value={serviceProviderId || undefined} 
           onValueChange={(value) => setServiceProviderId(value || null)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select a service provider (optional)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">None</SelectItem>
+            {/* Fix empty string value issue by using "none" string instead */}
+            <SelectItem value="none">None</SelectItem>
             {serviceProviders.map((provider) => (
               <SelectItem key={provider.id} value={provider.id}>{provider.name}</SelectItem>
             ))}
@@ -155,7 +156,7 @@ const MaintenanceLogForm = ({ taskId, propertyId, onComplete, onCancel }: Mainte
             Cancel
           </Button>
         )}
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting} className="bg-brand-500 hover:bg-brand-600">
           {isSubmitting ? 'Saving...' : 'Complete Task'}
         </Button>
       </div>

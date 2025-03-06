@@ -77,23 +77,58 @@ const MaintenanceTaskDetail = ({ task, onEdit, onDelete }: MaintenanceTaskDetail
     return provider ? provider.name : 'Unknown Provider';
   };
 
+  // Get appropriate card color based on category
+  const getCategoryColors = () => {
+    switch(task.category) {
+      case 'HVAC': 
+        return {
+          border: 'border-t-sky-400', 
+          bg: 'bg-sky-50',
+          icon: 'text-sky-500'
+        };
+      case 'Plumbing': 
+        return {
+          border: 'border-t-emerald-400', 
+          bg: 'bg-emerald-50',
+          icon: 'text-emerald-500'
+        };
+      case 'Electrical': 
+        return {
+          border: 'border-t-amber-400', 
+          bg: 'bg-amber-50',
+          icon: 'text-amber-500'
+        };
+      case 'Appliances': 
+        return {
+          border: 'border-t-purple-400', 
+          bg: 'bg-purple-50',
+          icon: 'text-purple-500'
+        };
+      default: 
+        return {
+          border: 'border-t-slate-400', 
+          bg: 'bg-slate-50',
+          icon: 'text-slate-500'
+        };
+    }
+  };
+
+  const categoryColors = getCategoryColors();
+
   return (
     <div className="space-y-6">
-      <Card className="border-t-4" style={{ borderTopColor: task.category === 'HVAC' ? '#0ea5e9' : 
-                                          task.category === 'Plumbing' ? '#22c55e' :
-                                          task.category === 'Electrical' ? '#f59e0b' : 
-                                          task.category === 'Appliances' ? '#8b5cf6' : '#64748b' }}>
-        <CardHeader className="pb-2">
+      <Card className={`border-t-4 shadow-sm ${categoryColors.border}`}>
+        <CardHeader className={`pb-2 rounded-t-lg ${categoryColors.bg}`}>
           <div className="flex justify-between items-start">
             <div>
               <Badge className="mb-2" variant="outline">{task.category}</Badge>
               <CardTitle className="text-2xl">{task.title}</CardTitle>
             </div>
             <div className="flex space-x-2">
-              <Button variant="outline" size="sm" onClick={onEdit} className="h-8">
-                <Edit className="h-3.5 w-3.5 mr-1" /> Edit
+              <Button variant="outline" size="sm" onClick={onEdit} className="h-8 border-purple-200 hover:bg-purple-50">
+                <Edit className="h-3.5 w-3.5 mr-1 text-purple-500" /> Edit
               </Button>
-              <Button variant="outline" size="sm" onClick={confirmDelete} className="text-red-500 hover:text-red-700 h-8">
+              <Button variant="outline" size="sm" onClick={confirmDelete} className="text-red-500 hover:text-red-700 h-8 border-red-200 hover:bg-red-50">
                 <Trash className="h-3.5 w-3.5 mr-1" /> Delete
               </Button>
             </div>
@@ -103,12 +138,12 @@ const MaintenanceTaskDetail = ({ task, onEdit, onDelete }: MaintenanceTaskDetail
           )}
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border border-muted bg-muted/30">
+            <Card className="border border-purple-100 bg-white shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-medium flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-brand-500" /> Schedule Information
+                  <Calendar className={`h-4 w-4 mr-2 ${categoryColors.icon}`} /> Schedule Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 pt-0">
@@ -133,30 +168,30 @@ const MaintenanceTaskDetail = ({ task, onEdit, onDelete }: MaintenanceTaskDetail
                 )}
               </CardContent>
               <CardFooter className="pt-2">
-                <Button className="w-full" onClick={() => setIsShowingLogForm(true)}>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700" onClick={() => setIsShowingLogForm(true)}>
                   <CheckCircle className="h-4 w-4 mr-2" /> Mark as Completed
                 </Button>
               </CardFooter>
             </Card>
             
-            <Card className="border border-muted bg-muted/30">
+            <Card className="border border-purple-100 bg-white shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-medium flex items-center">
-                  <FileText className="h-4 w-4 mr-2 text-brand-500" /> Maintenance History
+                  <FileText className={`h-4 w-4 mr-2 ${categoryColors.icon}`} /> Maintenance History
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 {logs.length > 0 ? (
                   <div className="space-y-3">
                     {logs.slice(0, 3).map((log) => (
-                      <Card key={log.id} className="overflow-hidden border-0 shadow-sm bg-white">
+                      <Card key={log.id} className="overflow-hidden border-0 shadow-sm bg-white hover:shadow-md transition-all">
                         <div className="px-3 py-2">
                           <div className="flex justify-between items-center mb-1">
                             <div className="flex items-center gap-1 text-sm font-medium">
-                              <Calendar className="h-3.5 w-3.5 text-gray-500" />
+                              <Calendar className="h-3.5 w-3.5 text-purple-500" />
                               {formatDate(log.completedDate)}
                             </div>
-                            <Badge variant="outline" className="font-mono">
+                            <Badge variant="outline" className="font-mono bg-green-50 text-green-700 border-green-200">
                               <DollarSign className="h-3 w-3 mr-0.5" />
                               {formatCurrency(log.cost)}
                             </Badge>
@@ -164,7 +199,7 @@ const MaintenanceTaskDetail = ({ task, onEdit, onDelete }: MaintenanceTaskDetail
                           
                           {log.serviceProviderId && (
                             <div className="flex items-center text-xs text-gray-600 mb-1">
-                              <User className="h-3 w-3 mr-1" />
+                              <User className="h-3 w-3 mr-1 text-indigo-500" />
                               {getServiceProviderName(log.serviceProviderId)}
                             </div>
                           )}
@@ -176,7 +211,7 @@ const MaintenanceTaskDetail = ({ task, onEdit, onDelete }: MaintenanceTaskDetail
                       </Card>
                     ))}
                     {logs.length > 3 && (
-                      <Button variant="link" className="p-0 h-auto">
+                      <Button variant="link" className="p-0 h-auto text-purple-600 hover:text-purple-800">
                         View all {logs.length} entries
                       </Button>
                     )}

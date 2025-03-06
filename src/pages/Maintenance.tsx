@@ -143,9 +143,9 @@ const Maintenance = () => {
 
   return (
     <Layout>
-      <div className="mb-6">
+      <div className="mb-6 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Maintenance Schedule</h1>
-        <p className="text-gray-500">Track and manage your home maintenance tasks</p>
+        <p className="text-gray-600">Track and manage your home maintenance tasks</p>
       </div>
       
       {selectedProperty ? (
@@ -157,14 +157,14 @@ const Maintenance = () => {
                 placeholder="Search tasks..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-purple-200 focus:border-purple-300 focus:ring-purple-300"
               />
             </div>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="min-w-[120px]">
-                  <Filter className="h-4 w-4 mr-2" /> {selectedCategory || 'All Categories'}
+                <Button variant="outline" className="min-w-[120px] border-purple-200 hover:bg-purple-50">
+                  <Filter className="h-4 w-4 mr-2 text-purple-500" /> {selectedCategory || 'All Categories'}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[200px]">
@@ -181,7 +181,7 @@ const Maintenance = () => {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            <Button onClick={() => setIsAddingTask(true)}>
+            <Button onClick={() => setIsAddingTask(true)} className="bg-purple-600 hover:bg-purple-700">
               <Plus className="h-4 w-4 mr-2" /> Add Task
             </Button>
           </div>
@@ -189,32 +189,26 @@ const Maintenance = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1 space-y-6">
               <Tabs defaultValue="upcoming" className="w-full">
-                <TabsList className="w-full">
-                  <TabsTrigger value="upcoming" className="flex-1">
+                <TabsList className="w-full bg-purple-100">
+                  <TabsTrigger value="upcoming" className="flex-1 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
                     <AlertCircle className="h-4 w-4 mr-2" /> Due Soon
                     {overdueTasksList.length + upcomingTasksList.length > 0 && (
                       <Badge className="ml-2 bg-red-500">{overdueTasksList.length + upcomingTasksList.length}</Badge>
                     )}
                   </TabsTrigger>
-                  <TabsTrigger value="all" className="flex-1">
+                  <TabsTrigger value="all" className="flex-1 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
                     <Calendar className="h-4 w-4 mr-2" /> All
                   </TabsTrigger>
-                  <TabsTrigger value="completed" className="flex-1">
+                  <TabsTrigger value="completed" className="flex-1 data-[state=active]:bg-purple-600 data-[state=active]:text-white">
                     <CheckCircle className="h-4 w-4 mr-2" /> Completed
                   </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="upcoming" className="mt-4">
                   {overdueTasksList.length === 0 && upcomingTasksList.length === 0 ? (
-                    <Card className="border-dashed">
-                      <CardContent className="text-center py-8 text-gray-500">
-                        <CheckCircle className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                        <p>No tasks due soon</p>
-                        <Button variant="outline" size="sm" className="mt-4" onClick={() => setIsAddingTask(true)}>
-                          <Plus className="h-4 w-4 mr-2" /> Add Your First Task
-                        </Button>
-                      </CardContent>
-                    </Card>
+                    <div className="text-center p-6 text-gray-500 bg-gray-50 rounded-lg">
+                      <p>No tasks due soon</p>
+                    </div>
                   ) : (
                     <div className="space-y-4">
                       {overdueTasksList.length > 0 && (
@@ -240,15 +234,9 @@ const Maintenance = () => {
                 
                 <TabsContent value="all" className="mt-4">
                   {filteredTasks.length === 0 ? (
-                    <Card className="border-dashed">
-                      <CardContent className="text-center py-8 text-gray-500">
-                        <Calendar className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                        <p>No maintenance tasks found</p>
-                        <Button variant="outline" size="sm" className="mt-4" onClick={() => setIsAddingTask(true)}>
-                          <Plus className="h-4 w-4 mr-2" /> Add Your First Task
-                        </Button>
-                      </CardContent>
-                    </Card>
+                    <div className="text-center p-6 text-gray-500 bg-gray-50 rounded-lg">
+                      <p>No maintenance tasks found</p>
+                    </div>
                   ) : (
                     <div className="space-y-4">
                       {overdueTasksList.length > 0 && (
@@ -283,12 +271,9 @@ const Maintenance = () => {
                 
                 <TabsContent value="completed" className="mt-4">
                   {completedTasksList.length === 0 ? (
-                    <Card className="border-dashed">
-                      <CardContent className="text-center py-8 text-gray-500">
-                        <CheckCircle className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                        <p>No completed tasks</p>
-                      </CardContent>
-                    </Card>
+                    <div className="text-center p-6 text-gray-500 bg-gray-50 rounded-lg">
+                      <p>No completed tasks</p>
+                    </div>
                   ) : (
                     <div>
                       {completedTasksList.map(task => (
@@ -308,16 +293,13 @@ const Maintenance = () => {
                   onDelete={() => handleDeleteTask(selectedTask.id)}
                 />
               ) : (
-                <Card className="border-dashed h-full flex items-center justify-center">
-                  <CardContent className="text-center py-12 text-gray-500">
-                    <Calendar className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                    <h3 className="text-lg font-medium mb-1">No Task Selected</h3>
-                    <p className="mb-4">Select a task from the list to view details</p>
-                    <Button variant="outline" onClick={() => setIsAddingTask(true)}>
-                      <Plus className="h-4 w-4 mr-2" /> Add New Task
-                    </Button>
-                  </CardContent>
-                </Card>
+                <div className="h-full flex items-center justify-center bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-8">
+                  <div className="text-center">
+                    <Calendar className="h-12 w-12 mx-auto mb-3 text-purple-400 opacity-70" />
+                    <h3 className="text-lg font-medium mb-1 text-gray-800">No Task Selected</h3>
+                    <p className="mb-4 text-gray-600">Select a task from the list to view details</p>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -356,10 +338,10 @@ const Maintenance = () => {
           </Dialog>
         </>
       ) : (
-        <div className="text-center py-12">
+        <div className="text-center py-12 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">No Properties Found</h2>
-          <p className="text-gray-500 mb-6">Add a property to get started tracking maintenance tasks.</p>
-          <Button>Add Property</Button>
+          <p className="text-gray-600 mb-6">Add a property to get started tracking maintenance tasks.</p>
+          <Button className="bg-purple-600 hover:bg-purple-700">Add Property</Button>
         </div>
       )}
     </Layout>
