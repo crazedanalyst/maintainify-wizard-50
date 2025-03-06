@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, CheckCircle, FileText, Wrench, Trash, Edit, Plus, Tool, DollarSign, User } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, FileText, Wrench, Trash, Edit, Plus, DollarSign, User } from 'lucide-react';
 import {
   Card,
   CardContent,
