@@ -1,4 +1,6 @@
 
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,9 +8,21 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CreditCard, User, BellRing, Settings as SettingsIcon } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from '@/hooks/use-toast';
 
 const Accounts = () => {
   const { trialInfo } = useApp();
+  const navigate = useNavigate();
+  const [isPersonalInfoDialogOpen, setIsPersonalInfoDialogOpen] = useState(false);
+  const [isBillingDialogOpen, setIsBillingDialogOpen] = useState(false);
+  const [isNotificationDialogOpen, setIsNotificationDialogOpen] = useState(false);
   
   // Format trial end date
   const formatTrialEndDate = (timestamp: number) => {
@@ -17,6 +31,17 @@ const Accounts = () => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const handleUpgradeClick = () => {
+    toast({
+      title: "Upgrade Coming Soon",
+      description: "The upgrade functionality will be available in the next release.",
+    });
+  };
+
+  const handleNavigateToSettings = () => {
+    navigate('/settings');
   };
 
   return (
@@ -68,7 +93,7 @@ const Accounts = () => {
                 </div>
                 
                 {(!trialInfo.isActive || trialInfo.daysLeft < 7) && (
-                  <Button size="sm" className="w-full">Upgrade Now</Button>
+                  <Button size="sm" className="w-full" onClick={handleUpgradeClick}>Upgrade Now</Button>
                 )}
               </div>
             </CardContent>
@@ -80,19 +105,39 @@ const Accounts = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => setIsPersonalInfoDialogOpen(true)}
+                >
                   <User className="h-4 w-4 mr-2" />
                   Personal Information
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => setIsBillingDialogOpen(true)}
+                >
                   <CreditCard className="h-4 w-4 mr-2" />
                   Billing Details
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => setIsNotificationDialogOpen(true)}
+                >
                   <BellRing className="h-4 w-4 mr-2" />
                   Notification Settings
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={handleNavigateToSettings}
+                >
                   <SettingsIcon className="h-4 w-4 mr-2" />
                   Account Preferences
                 </Button>
@@ -201,7 +246,7 @@ const Accounts = () => {
                             <span className="text-sm">Document storage</span>
                           </li>
                         </ul>
-                        <Button className="w-full">Upgrade to Pro</Button>
+                        <Button className="w-full" onClick={handleUpgradeClick}>Upgrade to Pro</Button>
                       </CardContent>
                     </Card>
                   </div>
@@ -239,6 +284,60 @@ const Accounts = () => {
           </Tabs>
         </div>
       </div>
+
+      {/* Personal Information Dialog */}
+      <Dialog open={isPersonalInfoDialogOpen} onOpenChange={setIsPersonalInfoDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Personal Information</DialogTitle>
+            <DialogDescription>
+              Update your personal information.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 text-center text-gray-500">
+            Personal information settings will be available in the next release.
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setIsPersonalInfoDialogOpen(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Billing Dialog */}
+      <Dialog open={isBillingDialogOpen} onOpenChange={setIsBillingDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Billing Details</DialogTitle>
+            <DialogDescription>
+              Manage your payment methods and billing information.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 text-center text-gray-500">
+            Billing details management will be available in the next release.
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setIsBillingDialogOpen(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifications Dialog */}
+      <Dialog open={isNotificationDialogOpen} onOpenChange={setIsNotificationDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Notification Settings</DialogTitle>
+            <DialogDescription>
+              Manage how you receive notifications.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 text-center text-gray-500">
+            Notification settings will be available in the next release.
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setIsNotificationDialogOpen(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

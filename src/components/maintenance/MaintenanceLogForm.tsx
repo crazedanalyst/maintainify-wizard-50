@@ -103,6 +103,7 @@ const MaintenanceLogForm = ({ taskId, propertyId, onComplete, onCancel }: Mainte
                 selected={completedDate}
                 onSelect={(date) => date && setCompletedDate(date)}
                 initialFocus
+                className={cn("p-3 pointer-events-auto")}
               />
             </PopoverContent>
           </Popover>
@@ -124,14 +125,13 @@ const MaintenanceLogForm = ({ taskId, propertyId, onComplete, onCancel }: Mainte
       <div className="space-y-2">
         <label className="text-sm font-medium">Service Provider</label>
         <Select 
-          value={serviceProviderId || undefined} 
-          onValueChange={(value) => setServiceProviderId(value || null)}
+          value={serviceProviderId || "none"} 
+          onValueChange={(value) => setServiceProviderId(value === "none" ? null : value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select a service provider (optional)" />
           </SelectTrigger>
           <SelectContent>
-            {/* Fix empty string value issue by using "none" string instead */}
             <SelectItem value="none">None</SelectItem>
             {serviceProviders.map((provider) => (
               <SelectItem key={provider.id} value={provider.id}>{provider.name}</SelectItem>

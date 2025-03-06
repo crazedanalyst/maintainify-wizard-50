@@ -218,12 +218,13 @@ const MaintenanceTaskForm = ({ initialData, onSuccess, onCancel }: MaintenanceTa
               {nextDueDate ? formatDate(nextDueDate) : <span>Pick a date</span>}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
+          <PopoverContent className="w-auto p-0" align="start">
             <Calendar
               mode="single"
               selected={nextDueDate}
               onSelect={(date) => date && setNextDueDate(date)}
               initialFocus
+              className={cn("p-3 pointer-events-auto")}
             />
           </PopoverContent>
         </Popover>

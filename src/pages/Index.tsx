@@ -1,4 +1,6 @@
+
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/AppContext';
@@ -9,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { 
     maintenanceTasks, 
     warranties, 
@@ -36,6 +39,18 @@ const Dashboard = () => {
     warranty => warranty.expiryDate < now
   );
   
+  const handleNavigateToMaintenance = () => {
+    navigate('/maintenance');
+  };
+  
+  const handleNavigateToWarranties = () => {
+    navigate('/warranties');
+  };
+  
+  const handleNavigateToProviders = () => {
+    navigate('/service-providers');
+  };
+  
   return (
     <Layout>
       {trialInfo.isActive && (
@@ -45,7 +60,10 @@ const Dashboard = () => {
               <h3 className="text-lg font-semibold mb-1">Free Trial - {trialInfo.daysLeft} days remaining</h3>
               <p className="text-sm text-white/90">You have full access to all features during the trial period.</p>
             </div>
-            <Button className="mt-3 md:mt-0 bg-white text-brand-700 hover:bg-white/90">
+            <Button 
+              className="mt-3 md:mt-0 bg-white text-brand-700 hover:bg-white/90"
+              onClick={() => navigate('/accounts')}
+            >
               Upgrade to Premium
             </Button>
           </div>
@@ -102,7 +120,13 @@ const Dashboard = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Maintenance Tasks</h2>
-              <Button variant="outline" size="sm">View All</Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleNavigateToMaintenance}
+              >
+                View All
+              </Button>
             </div>
             
             <div className="space-y-4">
@@ -142,7 +166,7 @@ const Dashboard = () => {
                 <div className="p-8 text-center border rounded-lg bg-gray-50">
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No maintenance tasks</h3>
                   <p className="text-gray-500 mb-4">Add maintenance tasks to track your home maintenance schedule.</p>
-                  <Button>Add Task</Button>
+                  <Button onClick={handleNavigateToMaintenance}>Add Task</Button>
                 </div>
               )}
             </div>
@@ -151,7 +175,13 @@ const Dashboard = () => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900">Warranty Status</h2>
-              <Button variant="outline" size="sm">View All</Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleNavigateToWarranties}
+              >
+                View All
+              </Button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -205,7 +235,7 @@ const Dashboard = () => {
                 <div className="col-span-2 p-8 text-center border rounded-lg bg-gray-50">
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No warranty alerts</h3>
                   <p className="text-gray-500 mb-4">All your warranties are up to date.</p>
-                  <Button>Add Warranty</Button>
+                  <Button onClick={handleNavigateToWarranties}>Add Warranty</Button>
                 </div>
               )}
             </div>
@@ -215,7 +245,7 @@ const Dashboard = () => {
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">No Properties Found</h2>
           <p className="text-gray-500 mb-6">Add a property to get started tracking maintenance and warranties.</p>
-          <Button>Add Property</Button>
+          <Button onClick={() => navigate('/settings')}>Add Property</Button>
         </div>
       )}
     </Layout>
