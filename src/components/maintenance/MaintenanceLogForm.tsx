@@ -21,14 +21,6 @@ import {
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
-import { 
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage 
-} from '@/components/ui/form';
 
 interface MaintenanceLogFormProps {
   taskId: string;
@@ -57,7 +49,7 @@ const MaintenanceLogForm = ({ taskId, propertyId, onComplete, onCancel }: Mainte
       const costValue = parseFloat(cost) || 0;
       
       await completeMaintenanceTask(taskId, {
-        taskId, // Add the missing taskId property
+        taskId,
         propertyId,
         completedDate: completedDate.getTime(),
         cost: costValue,
@@ -69,6 +61,11 @@ const MaintenanceLogForm = ({ taskId, propertyId, onComplete, onCancel }: Mainte
       if (onComplete) {
         onComplete();
       }
+      
+      toast({
+        title: "Task completed",
+        description: "The maintenance task has been completed successfully."
+      });
     } catch (error) {
       console.error('Error completing task:', error);
       toast({
@@ -82,21 +79,21 @@ const MaintenanceLogForm = ({ taskId, propertyId, onComplete, onCancel }: Mainte
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <FormItem className="col-span-1">
-          <FormLabel className="text-xs">Completion Date</FormLabel>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Completion Date</label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                size="sm"
                 className={cn(
-                  "w-full justify-start text-left font-normal text-xs h-8",
+                  "w-full justify-start text-left font-normal",
                   !completedDate && "text-muted-foreground"
                 )}
+                type="button"
               >
-                <CalendarIcon className="mr-1 h-3 w-3" />
+                <CalendarIcon className="mr-2 h-4 w-4" />
                 {completedDate ? formatDate(completedDate) : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
@@ -109,61 +106,56 @@ const MaintenanceLogForm = ({ taskId, propertyId, onComplete, onCancel }: Mainte
               />
             </PopoverContent>
           </Popover>
-        </FormItem>
+        </div>
 
-        <FormItem className="col-span-1">
-          <FormLabel className="text-xs">Cost ($)</FormLabel>
-          <FormControl>
-            <Input 
-              type="number" 
-              value={cost} 
-              onChange={(e) => setCost(e.target.value)} 
-              placeholder="0.00" 
-              step="0.01"
-              min="0"
-              className="h-8 text-xs"
-            />
-          </FormControl>
-        </FormItem>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Cost ($)</label>
+          <Input 
+            type="number" 
+            value={cost} 
+            onChange={(e) => setCost(e.target.value)} 
+            placeholder="0.00" 
+            step="0.01"
+            min="0"
+          />
+        </div>
       </div>
 
-      <FormItem>
-        <FormLabel className="text-xs">Service Provider</FormLabel>
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Service Provider</label>
         <Select 
           value={serviceProviderId || ''} 
           onValueChange={(value) => setServiceProviderId(value || null)}
         >
-          <SelectTrigger className="h-8 text-xs">
+          <SelectTrigger>
             <SelectValue placeholder="Select a service provider (optional)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="" className="text-xs">None</SelectItem>
+            <SelectItem value="">None</SelectItem>
             {serviceProviders.map((provider) => (
-              <SelectItem key={provider.id} value={provider.id} className="text-xs">{provider.name}</SelectItem>
+              <SelectItem key={provider.id} value={provider.id}>{provider.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-      </FormItem>
+      </div>
 
-      <FormItem>
-        <FormLabel className="text-xs">Notes</FormLabel>
-        <FormControl>
-          <Textarea 
-            value={notes} 
-            onChange={(e) => setNotes(e.target.value)} 
-            placeholder="Add any notes about the maintenance work..."
-            className="min-h-[60px] text-xs resize-none"
-          />
-        </FormControl>
-      </FormItem>
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Notes</label>
+        <Textarea 
+          value={notes} 
+          onChange={(e) => setNotes(e.target.value)} 
+          placeholder="Add any notes about the maintenance work..."
+          className="min-h-[100px] resize-none"
+        />
+      </div>
 
-      <div className="flex justify-end space-x-2 pt-2">
+      <div className="flex justify-end space-x-2 pt-4">
         {onCancel && (
-          <Button type="button" variant="outline" size="sm" onClick={onCancel} className="h-8 text-xs">
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
         )}
-        <Button type="submit" size="sm" className="h-8 text-xs" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Saving...' : 'Complete Task'}
         </Button>
       </div>

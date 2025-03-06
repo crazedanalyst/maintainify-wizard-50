@@ -9,10 +9,6 @@ import MaintenanceTaskDetail from '@/components/maintenance/MaintenanceTaskDetai
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Card, 
-  CardContent,
-} from '@/components/ui/card';
 import {
   Tabs,
   TabsContent,
@@ -34,8 +30,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Plus, Filter, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { Search, Plus, Filter, Calendar, CheckCircle, AlertCircle, Clock, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Maintenance = () => {
   const { maintenanceTasks, selectedProperty, deleteMaintenanceTask } = useApp();
@@ -110,29 +107,37 @@ const Maintenance = () => {
     const priority = getPriorityLevel(task.nextDue);
     const priorityColor = getPriorityColor(priority);
     
+    const borderColor = task.category === 'HVAC' ? 'border-l-sky-400' : 
+                       task.category === 'Plumbing' ? 'border-l-green-400' :
+                       task.category === 'Electrical' ? 'border-l-amber-400' : 
+                       task.category === 'Appliances' ? 'border-l-purple-400' : 'border-l-slate-400';
+    
     return (
-      <div 
-        className={`p-4 border rounded-lg mb-2 cursor-pointer transition-colors ${
-          selectedTask?.id === task.id ? 'border-brand-500 bg-brand-50' : 'hover:bg-gray-50'
-        }`}
+      <Card 
+        className={`overflow-hidden border border-muted mb-3 hover:shadow-md transition-all cursor-pointer border-l-4 ${
+          selectedTask?.id === task.id ? 'ring-1 ring-brand-500 bg-brand-50' : ''
+        } ${borderColor}`}
         onClick={() => setSelectedTask(task)}
       >
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium text-gray-900">{task.title}</h3>
-            <p className="text-sm text-gray-500 mt-1">{task.category}</p>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="font-medium text-gray-900">{task.title}</h3>
+              <p className="text-sm text-gray-500 mt-1">{task.category}</p>
+            </div>
+            <Badge className={priorityColor}>
+              {priority === 'overdue' ? 'Overdue' : 
+               priority === 'high' ? 'Due Soon' : 
+               priority === 'medium' ? 'Upcoming' : 'Scheduled'}
+            </Badge>
           </div>
-          <Badge className={priorityColor}>
-            {priority === 'overdue' ? 'Overdue' : 
-             priority === 'high' ? 'Due Soon' : 
-             priority === 'medium' ? 'Upcoming' : 'Scheduled'}
-          </Badge>
-        </div>
-        <div className="mt-2 flex items-center text-sm">
-          <Calendar className="h-4 w-4 mr-1 text-gray-400" />
-          <span>Due {getRelativeTime(task.nextDue)}</span>
-        </div>
-      </div>
+          <div className="mt-2 flex items-center text-sm">
+            <Clock className="h-4 w-4 mr-1 text-gray-400" />
+            <span>Due {getRelativeTime(task.nextDue)}</span>
+            <ChevronRight className="h-4 w-4 ml-auto text-gray-400" />
+          </div>
+        </CardContent>
+      </Card>
     );
   };
 
@@ -201,10 +206,15 @@ const Maintenance = () => {
                 
                 <TabsContent value="upcoming" className="mt-4">
                   {overdueTasksList.length === 0 && upcomingTasksList.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <CheckCircle className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                      <p>No tasks due soon</p>
-                    </div>
+                    <Card className="border-dashed">
+                      <CardContent className="text-center py-8 text-gray-500">
+                        <CheckCircle className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                        <p>No tasks due soon</p>
+                        <Button variant="outline" size="sm" className="mt-4" onClick={() => setIsAddingTask(true)}>
+                          <Plus className="h-4 w-4 mr-2" /> Add Your First Task
+                        </Button>
+                      </CardContent>
+                    </Card>
                   ) : (
                     <div className="space-y-4">
                       {overdueTasksList.length > 0 && (
@@ -230,10 +240,15 @@ const Maintenance = () => {
                 
                 <TabsContent value="all" className="mt-4">
                   {filteredTasks.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <Calendar className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                      <p>No maintenance tasks found</p>
-                    </div>
+                    <Card className="border-dashed">
+                      <CardContent className="text-center py-8 text-gray-500">
+                        <Calendar className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                        <p>No maintenance tasks found</p>
+                        <Button variant="outline" size="sm" className="mt-4" onClick={() => setIsAddingTask(true)}>
+                          <Plus className="h-4 w-4 mr-2" /> Add Your First Task
+                        </Button>
+                      </CardContent>
+                    </Card>
                   ) : (
                     <div className="space-y-4">
                       {overdueTasksList.length > 0 && (
@@ -268,10 +283,12 @@ const Maintenance = () => {
                 
                 <TabsContent value="completed" className="mt-4">
                   {completedTasksList.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <CheckCircle className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                      <p>No completed tasks</p>
-                    </div>
+                    <Card className="border-dashed">
+                      <CardContent className="text-center py-8 text-gray-500">
+                        <CheckCircle className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                        <p>No completed tasks</p>
+                      </CardContent>
+                    </Card>
                   ) : (
                     <div>
                       {completedTasksList.map(task => (
@@ -284,14 +301,21 @@ const Maintenance = () => {
             </div>
             
             <div className="lg:col-span-2">
-              {selectedTask && (
-                <Card>
-                  <CardContent className="p-6">
-                    <MaintenanceTaskDetail 
-                      task={selectedTask} 
-                      onEdit={() => setEditingTask(selectedTask)}
-                      onDelete={() => handleDeleteTask(selectedTask.id)}
-                    />
+              {selectedTask ? (
+                <MaintenanceTaskDetail 
+                  task={selectedTask} 
+                  onEdit={() => setEditingTask(selectedTask)}
+                  onDelete={() => handleDeleteTask(selectedTask.id)}
+                />
+              ) : (
+                <Card className="border-dashed h-full flex items-center justify-center">
+                  <CardContent className="text-center py-12 text-gray-500">
+                    <Calendar className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <h3 className="text-lg font-medium mb-1">No Task Selected</h3>
+                    <p className="mb-4">Select a task from the list to view details</p>
+                    <Button variant="outline" onClick={() => setIsAddingTask(true)}>
+                      <Plus className="h-4 w-4 mr-2" /> Add New Task
+                    </Button>
                   </CardContent>
                 </Card>
               )}
