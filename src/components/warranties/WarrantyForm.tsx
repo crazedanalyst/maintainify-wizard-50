@@ -49,8 +49,8 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
   const [manufacturer, setManufacturer] = useState('');
   const [category, setCategory] = useState<Category>('Home');
   const [description, setDescription] = useState('');
-  const [purchaseDate, setPurchaseDate] = useState<Date>(new Date());
-  const [expiryDate, setExpiryDate] = useState<Date>(new Date());
+  const [purchaseDate, setPurchaseDate] = useState<Date | undefined>(new Date());
+  const [expiryDate, setExpiryDate] = useState<Date | undefined>(new Date());
   
   // Initialize form with warranty data if editing
   useEffect(() => {
@@ -67,10 +67,10 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedProperty) {
+    if (!selectedProperty || !purchaseDate || !expiryDate) {
       toast({
         title: 'Error',
-        description: 'No property selected. Please select a property first.',
+        description: 'Please fill in all required fields.',
         variant: 'destructive'
       });
       return;
@@ -91,7 +91,6 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
       };
       
       if (warranty) {
-        // Update existing warranty
         await updateWarranty({
           ...warranty,
           ...warrantyData,
@@ -101,7 +100,6 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
           description: 'Warranty information has been updated successfully.',
         });
       } else {
-        // Add new warranty
         await addWarranty(warrantyData);
         toast({
           title: 'Warranty Added',
@@ -185,12 +183,13 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
                 {purchaseDate ? formatDate(purchaseDate) : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
+            <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
                 selected={purchaseDate}
-                onSelect={(date) => date && setPurchaseDate(date)}
+                onSelect={setPurchaseDate}
                 initialFocus
+                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
@@ -212,12 +211,13 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
                 {expiryDate ? formatDate(expiryDate) : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
+            <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
                 selected={expiryDate}
-                onSelect={(date) => date && setExpiryDate(date)}
+                onSelect={setExpiryDate}
                 initialFocus
+                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>

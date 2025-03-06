@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
@@ -8,11 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search, Plus, Phone, Mail, Globe, Star } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@radix-ui/react-dialog';
+import ServiceProviderForm from '@/components/ServiceProviderForm';
 
 const ServiceProviders = () => {
   const { serviceProviders } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
   // Get unique categories from all service providers
   const allCategories = Array.from(
@@ -74,7 +76,7 @@ const ServiceProviders = () => {
           ))}
         </div>
         
-        <Button>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" /> Add Provider
         </Button>
       </div>
@@ -93,11 +95,27 @@ const ServiceProviders = () => {
           <p className="text-gray-500 mb-4">
             Add your trusted service providers to easily access their contact information.
           </p>
-          <Button>
+          <Button onClick={() => setIsAddDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" /> Add Service Provider
           </Button>
         </div>
       )}
+
+      {/* Add Provider Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>Add Service Provider</DialogTitle>
+            <DialogDescription>
+              Add a new service provider to your contacts.
+            </DialogDescription>
+          </DialogHeader>
+          <ServiceProviderForm 
+            onSuccess={() => setIsAddDialogOpen(false)}
+            onCancel={() => setIsAddDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
