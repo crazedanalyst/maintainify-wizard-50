@@ -12,13 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { Check, ChevronsUpDown } from "lucide-react";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -54,7 +48,6 @@ const ServiceProviderForm = ({ provider, onSave, onCancel, onSuccess }: ServiceP
   const [notes, setNotes] = useState('');
   const [rating, setRating] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [openCategories, setOpenCategories] = useState(false);
   
   // Initialize form with provider data if editing
   useEffect(() => {
@@ -142,6 +135,14 @@ const ServiceProviderForm = ({ provider, onSave, onCancel, onSuccess }: ServiceP
     });
   };
 
+  // Function to handle category selection from dropdown
+  const handleCategorySelect = (value: string) => {
+    const category = value as Category;
+    if (!categories.includes(category)) {
+      setCategories(prev => [...prev, category]);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div>
@@ -200,21 +201,18 @@ const ServiceProviderForm = ({ provider, onSave, onCancel, onSuccess }: ServiceP
               </Badge>
             ))}
           </div>
-          <Select>
+          <Select onValueChange={handleCategorySelect}>
             <SelectTrigger className="h-8 text-xs">
               <SelectValue placeholder="Add categories..." />
             </SelectTrigger>
             <SelectContent>
-              {categoryOptions.map((cat) => (
-                <SelectItem 
-                  key={cat} 
-                  value={cat}
-                  disabled={categories.includes(cat)}
-                  onSelect={() => toggleCategory(cat)}
-                >
-                  {cat}
-                </SelectItem>
-              ))}
+              {categoryOptions
+                .filter(cat => !categories.includes(cat))
+                .map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
