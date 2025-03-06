@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { ServiceProvider, Category } from '@/lib/db-service';
@@ -26,6 +25,7 @@ interface ServiceProviderFormProps {
   provider?: ServiceProvider;
   onSave?: () => void;
   onCancel?: () => void;
+  onSuccess?: () => void;
 }
 
 const categoryOptions: Category[] = [
@@ -40,7 +40,7 @@ const categoryOptions: Category[] = [
   'Other'
 ];
 
-const ServiceProviderForm = ({ provider, onSave, onCancel }: ServiceProviderFormProps) => {
+const ServiceProviderForm = ({ provider, onSave, onCancel, onSuccess }: ServiceProviderFormProps) => {
   const { addServiceProvider, updateServiceProvider } = useApp();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -111,7 +111,10 @@ const ServiceProviderForm = ({ provider, onSave, onCancel }: ServiceProviderForm
         });
       }
       
-      if (onSave) {
+      // Call the appropriate callback
+      if (onSuccess) {
+        onSuccess();
+      } else if (onSave) {
         onSave();
       }
     } catch (error) {
