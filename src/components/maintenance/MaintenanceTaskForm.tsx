@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Category, MaintenanceTask } from '@/lib/db-service';
 import { addTimeToDate, formatDate } from '@/lib/utils';
@@ -13,14 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage 
-} from '@/components/ui/form';
+import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
@@ -139,38 +132,36 @@ const MaintenanceTaskForm = ({ initialData, onSuccess, onCancel }: MaintenanceTa
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <FormItem>
-        <FormLabel>Task Name</FormLabel>
-        <FormControl>
-          <Input 
-            value={title} 
-            onChange={(e) => setTitle(e.target.value)} 
-            placeholder="e.g. Replace HVAC Filter" 
-            required
-          />
-        </FormControl>
-      </FormItem>
+      <div className="space-y-2">
+        <Label htmlFor="title">Task Name</Label>
+        <Input 
+          id="title"
+          value={title} 
+          onChange={(e) => setTitle(e.target.value)} 
+          placeholder="e.g. Replace HVAC Filter" 
+          required
+        />
+      </div>
 
-      <FormItem>
-        <FormLabel>Description</FormLabel>
-        <FormControl>
-          <Textarea 
-            value={description} 
-            onChange={(e) => setDescription(e.target.value)} 
-            placeholder="Describe the maintenance task..." 
-            className="min-h-[100px]"
-          />
-        </FormControl>
-      </FormItem>
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea 
+          id="description"
+          value={description} 
+          onChange={(e) => setDescription(e.target.value)} 
+          placeholder="Describe the maintenance task..." 
+          className="min-h-[100px]"
+        />
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormItem>
-          <FormLabel>Category</FormLabel>
+        <div className="space-y-2">
+          <Label htmlFor="category">Category</Label>
           <Select 
             value={category} 
             onValueChange={(value: Category) => setCategory(value)}
           >
-            <SelectTrigger>
+            <SelectTrigger id="category">
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>
             <SelectContent>
@@ -179,12 +170,13 @@ const MaintenanceTaskForm = ({ initialData, onSuccess, onCancel }: MaintenanceTa
               ))}
             </SelectContent>
           </Select>
-        </FormItem>
+        </div>
 
-        <div className="flex flex-col space-y-1.5">
-          <FormLabel>Repeat Every</FormLabel>
+        <div className="space-y-2">
+          <Label htmlFor="frequency">Repeat Every</Label>
           <div className="flex space-x-2">
             <Input 
+              id="frequency"
               type="number" 
               value={frequencyValue} 
               onChange={(e) => setFrequencyValue(e.target.value)} 
@@ -209,16 +201,18 @@ const MaintenanceTaskForm = ({ initialData, onSuccess, onCancel }: MaintenanceTa
         </div>
       </div>
 
-      <FormItem>
-        <FormLabel>Next Due Date</FormLabel>
+      <div className="space-y-2">
+        <Label htmlFor="dueDate">Next Due Date</Label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
+              id="dueDate"
               variant="outline"
               className={cn(
                 "w-full justify-start text-left font-normal",
                 !nextDueDate && "text-muted-foreground"
               )}
+              type="button"
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {nextDueDate ? formatDate(nextDueDate) : <span>Pick a date</span>}
@@ -233,7 +227,7 @@ const MaintenanceTaskForm = ({ initialData, onSuccess, onCancel }: MaintenanceTa
             />
           </PopoverContent>
         </Popover>
-      </FormItem>
+      </div>
 
       <div className="flex justify-end space-x-2 pt-4">
         {onCancel && (

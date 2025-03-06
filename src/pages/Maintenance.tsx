@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
@@ -10,11 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
+  CardContent,
 } from '@/components/ui/card';
 import {
   Tabs,
@@ -37,7 +34,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Plus, Filter, MoreVertical, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { Search, Plus, Filter, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const Maintenance = () => {
@@ -287,8 +284,8 @@ const Maintenance = () => {
             </div>
             
             <div className="lg:col-span-2">
-              <Card className="h-full">
-                {selectedTask ? (
+              {selectedTask && (
+                <Card>
                   <CardContent className="p-6">
                     <MaintenanceTaskDetail 
                       task={selectedTask} 
@@ -296,14 +293,8 @@ const Maintenance = () => {
                       onDelete={() => handleDeleteTask(selectedTask.id)}
                     />
                   </CardContent>
-                ) : (
-                  <div className="flex items-center justify-center h-full p-8">
-                    <Button onClick={() => setIsAddingTask(true)}>
-                      <Plus className="h-4 w-4 mr-2" /> Add New Task
-                    </Button>
-                  </div>
-                )}
-              </Card>
+                </Card>
+              )}
             </div>
           </div>
           
