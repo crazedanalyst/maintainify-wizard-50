@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { ServiceProvider, Category } from '@/lib/db-service';
@@ -20,6 +21,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 interface ServiceProviderFormProps {
   provider?: ServiceProvider;
@@ -129,12 +131,15 @@ const ServiceProviderForm = ({ provider, onSave, onCancel, onSuccess }: ServiceP
     }
   };
 
+  // Function to toggle category selection
   const toggleCategory = (category: Category) => {
-    if (categories.includes(category)) {
-      setCategories(categories.filter(c => c !== category));
-    } else {
-      setCategories([...categories, category]);
-    }
+    setCategories(prev => {
+      if (prev.includes(category)) {
+        return prev.filter(c => c !== category);
+      } else {
+        return [...prev, category];
+      }
+    });
   };
 
   return (
@@ -187,45 +192,32 @@ const ServiceProviderForm = ({ provider, onSave, onCancel, onSuccess }: ServiceP
       
       <div>
         <label className="text-xs font-medium">Categories*</label>
-        <Popover open={openCategories} onOpenChange={setOpenCategories}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={openCategories}
-              className="w-full justify-between h-8 text-xs mt-1"
-            >
-              {categories.length > 0
-                ? `${categories.length} selected`
-                : "Select categories..."}
-              <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-full p-0">
-            <Command>
-              <CommandInput placeholder="Search categories..." className="text-xs h-8" />
-              <CommandEmpty>No category found.</CommandEmpty>
-              <CommandGroup className="max-h-40 overflow-auto">
-                {categoryOptions.map(category => (
-                  <CommandItem
-                    key={category}
-                    value={category}
-                    onSelect={() => toggleCategory(category)}
-                    className="text-xs"
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-3 w-3",
-                        categories.includes(category) ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {category}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </Command>
-          </PopoverContent>
-        </Popover>
+        <div className="mt-1">
+          <div className="flex flex-wrap gap-1 mb-2">
+            {categories.map((cat) => (
+              <Badge key={cat} className="bg-brand-100 text-brand-800 hover:bg-brand-200" onClick={() => toggleCategory(cat)}>
+                {cat} <span className="ml-1">×</span>
+              </Badge>
+            ))}
+          </div>
+          <Select>
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Add categories..." />
+            </SelectTrigger>
+            <SelectContent>
+              {categoryOptions.map((cat) => (
+                <SelectItem 
+                  key={cat} 
+                  value={cat}
+                  disabled={categories.includes(cat)}
+                  onSelect={() => toggleCategory(cat)}
+                >
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       
       <div>

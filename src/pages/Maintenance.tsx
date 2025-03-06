@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
@@ -50,12 +49,10 @@ const Maintenance = () => {
   const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(null);
   const [editingTask, setEditingTask] = useState<MaintenanceTask | null>(null);
   
-  // Filter tasks by property
   const propertyTasks = selectedProperty
     ? maintenanceTasks.filter(task => task.propertyId === selectedProperty.id)
     : [];
   
-  // Apply search and category filters
   const filteredTasks = propertyTasks.filter(task => {
     const matchesSearch = searchTerm === '' || 
       task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,7 +63,6 @@ const Maintenance = () => {
     return matchesSearch && matchesCategory;
   });
   
-  // Group tasks by priority
   const overdueTasksList = filteredTasks.filter(task => getPriorityLevel(task.nextDue) === 'overdue');
   const upcomingTasksList = filteredTasks.filter(task => getPriorityLevel(task.nextDue) === 'high');
   const scheduledTasksList = filteredTasks.filter(
@@ -76,7 +72,6 @@ const Maintenance = () => {
     (a, b) => (b.lastCompleted || 0) - (a.lastCompleted || 0)
   );
   
-  // Get unique categories from tasks
   const categories = Array.from(new Set(propertyTasks.map(task => task.category)));
   
   const handleTaskAdded = () => {
@@ -114,7 +109,6 @@ const Maintenance = () => {
     }
   };
   
-  // Task list item component
   const TaskItem = ({ task }: { task: MaintenanceTask }) => {
     const priority = getPriorityLevel(task.nextDue);
     const priorityColor = getPriorityColor(priority);
@@ -154,7 +148,6 @@ const Maintenance = () => {
       
       {selectedProperty ? (
         <>
-          {/* Search and filters */}
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -192,7 +185,6 @@ const Maintenance = () => {
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Task list */}
             <div className="lg:col-span-1 space-y-6">
               <Tabs defaultValue="upcoming" className="w-full">
                 <TabsList className="w-full">
@@ -294,7 +286,6 @@ const Maintenance = () => {
               </Tabs>
             </div>
             
-            {/* Task details */}
             <div className="lg:col-span-2">
               <Card className="h-full">
                 {selectedTask ? (
@@ -323,7 +314,6 @@ const Maintenance = () => {
             </div>
           </div>
           
-          {/* Add Task Dialog */}
           <Dialog open={isAddingTask} onOpenChange={setIsAddingTask}>
             <DialogContent className="sm:max-w-[550px]">
               <DialogHeader>
@@ -339,7 +329,6 @@ const Maintenance = () => {
             </DialogContent>
           </Dialog>
           
-          {/* Edit Task Dialog */}
           <Dialog open={Boolean(editingTask)} onOpenChange={(open) => !open && setEditingTask(null)}>
             <DialogContent className="sm:max-w-[550px]">
               <DialogHeader>
