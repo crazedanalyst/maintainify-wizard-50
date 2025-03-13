@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,7 +29,15 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const Register = () => {
-  const { register: registerUser, isLoading } = useAuth();
+  const { register: registerUser, isLoading, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
   
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -140,6 +148,10 @@ const Register = () => {
               >
                 {isLoading ? 'Creating account...' : 'Create account'}
               </Button>
+              
+              <div className="text-center text-sm text-gray-500">
+                <p>Already have an account? <Link to="/login" className="font-medium text-brand-600 hover:text-brand-500">Sign in</Link></p>
+              </div>
             </form>
           </Form>
         </div>
