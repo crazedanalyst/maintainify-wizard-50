@@ -14,8 +14,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 
 const Accounts = () => {
   const { trialInfo } = useApp();
@@ -23,6 +28,31 @@ const Accounts = () => {
   const [isPersonalInfoDialogOpen, setIsPersonalInfoDialogOpen] = useState(false);
   const [isBillingDialogOpen, setIsBillingDialogOpen] = useState(false);
   const [isNotificationDialogOpen, setIsNotificationDialogOpen] = useState(false);
+  
+  // Personal information form state
+  const [personalInfo, setPersonalInfo] = useState({
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@example.com",
+    phone: "(555) 123-4567"
+  });
+
+  // Billing details form state
+  const [billingDetails, setBillingDetails] = useState({
+    cardName: "John Doe",
+    cardNumber: "•••• •••• •••• 4242",
+    expiry: "12/25",
+    address: "123 Main St, Anytown, US 12345"
+  });
+
+  // Notification settings state
+  const [notificationSettings, setNotificationSettings] = useState({
+    email: true,
+    push: true,
+    maintenance: true,
+    warranty: true,
+    service: false
+  });
   
   // Format trial end date
   const formatTrialEndDate = (timestamp: number) => {
@@ -42,6 +72,57 @@ const Accounts = () => {
 
   const handleNavigateToSettings = () => {
     navigate('/settings');
+  };
+
+  // Handle personal info changes
+  const handlePersonalInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPersonalInfo({
+      ...personalInfo,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  // Handle save personal info
+  const handleSavePersonalInfo = () => {
+    toast({
+      title: "Personal Information Updated",
+      description: "Your personal information has been successfully updated.",
+    });
+    setIsPersonalInfoDialogOpen(false);
+  };
+
+  // Handle billing details changes
+  const handleBillingDetailsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setBillingDetails({
+      ...billingDetails,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  // Handle save billing details
+  const handleSaveBillingDetails = () => {
+    toast({
+      title: "Billing Details Updated",
+      description: "Your billing information has been successfully updated.",
+    });
+    setIsBillingDialogOpen(false);
+  };
+
+  // Handle notification settings toggle
+  const handleNotificationToggle = (setting: string) => {
+    setNotificationSettings({
+      ...notificationSettings,
+      [setting]: !notificationSettings[setting as keyof typeof notificationSettings]
+    });
+  };
+
+  // Handle save notification settings
+  const handleSaveNotificationSettings = () => {
+    toast({
+      title: "Notification Settings Updated",
+      description: "Your notification preferences have been saved.",
+    });
+    setIsNotificationDialogOpen(false);
   };
 
   return (
@@ -287,55 +368,190 @@ const Accounts = () => {
 
       {/* Personal Information Dialog */}
       <Dialog open={isPersonalInfoDialogOpen} onOpenChange={setIsPersonalInfoDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Personal Information</DialogTitle>
             <DialogDescription>
               Update your personal information.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 text-center text-gray-500">
-            Personal information settings will be available in the next release.
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First name</Label>
+                <Input 
+                  id="firstName" 
+                  name="firstName" 
+                  value={personalInfo.firstName} 
+                  onChange={handlePersonalInfoChange} 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last name</Label>
+                <Input 
+                  id="lastName" 
+                  name="lastName" 
+                  value={personalInfo.lastName} 
+                  onChange={handlePersonalInfoChange} 
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                name="email" 
+                type="email" 
+                value={personalInfo.email} 
+                onChange={handlePersonalInfoChange} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input 
+                id="phone" 
+                name="phone" 
+                value={personalInfo.phone} 
+                onChange={handlePersonalInfoChange} 
+              />
+            </div>
           </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setIsPersonalInfoDialogOpen(false)}>Close</Button>
-          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPersonalInfoDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSavePersonalInfo}>Save changes</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Billing Dialog */}
       <Dialog open={isBillingDialogOpen} onOpenChange={setIsBillingDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Billing Details</DialogTitle>
             <DialogDescription>
               Manage your payment methods and billing information.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 text-center text-gray-500">
-            Billing details management will be available in the next release.
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="cardName">Name on card</Label>
+              <Input 
+                id="cardName" 
+                name="cardName" 
+                value={billingDetails.cardName} 
+                onChange={handleBillingDetailsChange} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cardNumber">Card number</Label>
+              <Input 
+                id="cardNumber" 
+                name="cardNumber" 
+                disabled
+                value={billingDetails.cardNumber} 
+              />
+              <span className="text-xs text-muted-foreground">
+                To update your card, please contact support.
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="expiry">Expiry</Label>
+                <Input 
+                  id="expiry" 
+                  name="expiry" 
+                  disabled
+                  value={billingDetails.expiry} 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cvc">CVC</Label>
+                <Input id="cvc" name="cvc" placeholder="•••" disabled />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Billing address</Label>
+              <Textarea 
+                id="address" 
+                name="address" 
+                value={billingDetails.address} 
+                onChange={handleBillingDetailsChange} 
+              />
+            </div>
           </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setIsBillingDialogOpen(false)}>Close</Button>
-          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsBillingDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveBillingDetails}>Save changes</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Notifications Dialog */}
       <Dialog open={isNotificationDialogOpen} onOpenChange={setIsNotificationDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Notification Settings</DialogTitle>
             <DialogDescription>
               Manage how you receive notifications.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4 text-center text-gray-500">
-            Notification settings will be available in the next release.
+          <div className="py-4 space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Notification Methods</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="emailNotifications" className="flex-1">Email notifications</Label>
+                  <Switch 
+                    id="emailNotifications" 
+                    checked={notificationSettings.email}
+                    onCheckedChange={() => handleNotificationToggle('email')}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="pushNotifications" className="flex-1">Push notifications</Label>
+                  <Switch 
+                    id="pushNotifications" 
+                    checked={notificationSettings.push}
+                    onCheckedChange={() => handleNotificationToggle('push')}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Notification Types</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="maintenanceAlerts" className="flex-1">Maintenance alerts</Label>
+                  <Switch 
+                    id="maintenanceAlerts" 
+                    checked={notificationSettings.maintenance}
+                    onCheckedChange={() => handleNotificationToggle('maintenance')}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="warrantyAlerts" className="flex-1">Warranty expiration</Label>
+                  <Switch 
+                    id="warrantyAlerts" 
+                    checked={notificationSettings.warranty}
+                    onCheckedChange={() => handleNotificationToggle('warranty')}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="serviceAlerts" className="flex-1">Service provider updates</Label>
+                  <Switch 
+                    id="serviceAlerts" 
+                    checked={notificationSettings.service}
+                    onCheckedChange={() => handleNotificationToggle('service')}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setIsNotificationDialogOpen(false)}>Close</Button>
-          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsNotificationDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveNotificationSettings}>Save preferences</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </Layout>
