@@ -63,18 +63,35 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Add custom color scheme for our app
+				// Enhanced brand colors
 				brand: {
-					50: '#f0f9ff',
-					100: '#e0f2fe',
-					200: '#bae6fd',
-					300: '#7dd3fc',
-					400: '#38bdf8',
-					500: '#0ea5e9',
-					600: '#0284c7',
-					700: '#0369a1',
-					800: '#075985',
-					900: '#0c4a6e',
+					50: '#e6f5ff',
+					100: '#cce8ff',
+					200: '#99d1ff',
+					300: '#66baff',
+					400: '#3393ff', 
+					500: '#0077ff',
+					600: '#005ecc',
+					700: '#0046a6',
+					800: '#003380',
+					900: '#001f59',
+				},
+				// Neomorphism UI colors
+				neo: {
+					bg: '#f0f4f8',
+					shadow1: '#ffffff',
+					shadow2: '#d1d9e6',
+					highlight: '#ffffff',
+					accent1: '#4d7cff',
+					accent2: '#4da6ff',
+					text: '#2a3a4a',
+					muted: '#8a9db0',
+				},
+				// Status colors
+				status: {
+					stable: '#22c55e',
+					review: '#f59e0b',
+					critical: '#ef4444',
 				}
 			},
 			borderRadius: {
@@ -117,6 +134,14 @@ export default {
 				'fade-in': 'fadeIn 0.5s ease-out forwards',
 				'slide-in': 'slideIn 0.3s ease-out forwards',
 				'shimmer': 'shimmer 2s infinite',
+			},
+			boxShadow: {
+				'neo-sm': '5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff',
+				'neo': '10px 10px 20px #d1d9e6, -10px -10px 20px #ffffff',
+				'neo-lg': '15px 15px 30px #d1d9e6, -15px -15px 30px #ffffff',
+				'neo-inner': 'inset 5px 5px 10px #d1d9e6, inset -5px -5px 10px #ffffff',
+				'neo-btn': '3px 3px 6px #d1d9e6, -3px -3px 6px #ffffff',
+				'neo-btn-pressed': 'inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff',
 			}
 		}
 	},

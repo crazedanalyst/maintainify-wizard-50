@@ -16,6 +16,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 
 interface ServiceProviderFormProps {
   provider?: ServiceProvider;
@@ -144,68 +145,68 @@ const ServiceProviderForm = ({ provider, onSave, onCancel, onSuccess }: ServiceP
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div>
-        <label className="text-xs font-medium">Name*</label>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-neo-text">Name*</Label>
         <Input 
           value={name} 
           onChange={(e) => setName(e.target.value)} 
           placeholder="Company or individual name" 
           required
-          className="h-8 text-xs mt-1"
+          className="h-10 shadow-neo-inner bg-white text-sm"
         />
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs font-medium">Phone</label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-neo-text">Phone</Label>
           <Input 
             value={phone} 
             onChange={(e) => setPhone(e.target.value)} 
             placeholder="Contact phone number" 
-            className="h-8 text-xs mt-1"
+            className="h-10 shadow-neo-inner bg-white text-sm"
             type="tel"
           />
         </div>
         
-        <div>
-          <label className="text-xs font-medium">Email</label>
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-neo-text">Email</Label>
           <Input 
             value={email} 
             onChange={(e) => setEmail(e.target.value)} 
             placeholder="Contact email address" 
-            className="h-8 text-xs mt-1"
+            className="h-10 shadow-neo-inner bg-white text-sm"
             type="email"
           />
         </div>
       </div>
       
-      <div>
-        <label className="text-xs font-medium">Website</label>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-neo-text">Website</Label>
         <Input 
           value={website} 
           onChange={(e) => setWebsite(e.target.value)} 
           placeholder="Company website" 
-          className="h-8 text-xs mt-1"
+          className="h-10 shadow-neo-inner bg-white text-sm"
           type="url"
         />
       </div>
       
-      <div>
-        <label className="text-xs font-medium">Categories*</label>
-        <div className="mt-1">
-          <div className="flex flex-wrap gap-1 mb-2">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-neo-text">Categories*</Label>
+        <div>
+          <div className="flex flex-wrap gap-2 mb-3">
             {categories.map((cat) => (
-              <Badge key={cat} className="bg-brand-100 text-brand-800 hover:bg-brand-200" onClick={() => toggleCategory(cat)}>
+              <Badge key={cat} variant="neo-default" className="text-brand-600 cursor-pointer" onClick={() => toggleCategory(cat)}>
                 {cat} <span className="ml-1">×</span>
               </Badge>
             ))}
           </div>
           <Select onValueChange={handleCategorySelect}>
-            <SelectTrigger className="h-8 text-xs">
+            <SelectTrigger className="h-10 rounded-xl shadow-neo-btn bg-white">
               <SelectValue placeholder="Add categories..." />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl shadow-neo">
               {categoryOptions
                 .filter(cat => !categories.includes(cat))
                 .map((cat) => (
@@ -218,16 +219,16 @@ const ServiceProviderForm = ({ provider, onSave, onCancel, onSuccess }: ServiceP
         </div>
       </div>
       
-      <div>
-        <label className="text-xs font-medium">Rating (1-5)</label>
-        <div className="flex items-center space-x-2 mt-1">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-neo-text">Rating (1-5)</Label>
+        <div className="flex items-center space-x-3 mt-1">
           {[1, 2, 3, 4, 5].map(value => (
             <Button
               key={value}
               type="button"
-              variant={value <= rating ? "default" : "outline"}
+              variant={value <= rating ? "neo-primary" : "neo"}
               size="sm"
-              className="h-7 w-7 p-0"
+              className="h-9 w-9 p-0"
               onClick={() => setRating(value)}
             >
               {value}
@@ -236,23 +237,23 @@ const ServiceProviderForm = ({ provider, onSave, onCancel, onSuccess }: ServiceP
         </div>
       </div>
       
-      <div>
-        <label className="text-xs font-medium">Notes</label>
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-neo-text">Notes</Label>
         <Textarea 
           value={notes} 
           onChange={(e) => setNotes(e.target.value)} 
           placeholder="Add any notes about the service provider..."
-          className="min-h-[60px] text-xs resize-none mt-1"
+          className="min-h-[80px] text-sm resize-none rounded-xl shadow-neo-inner bg-white"
         />
       </div>
       
-      <div className="flex justify-end space-x-2 pt-2">
+      <div className="flex justify-end space-x-3 pt-4">
         {onCancel && (
-          <Button type="button" variant="outline" size="sm" onClick={onCancel} className="h-8 text-xs">
+          <Button type="button" variant="neo" onClick={onCancel}>
             Cancel
           </Button>
         )}
-        <Button type="submit" size="sm" className="h-8 text-xs" disabled={isSubmitting}>
+        <Button type="submit" variant="neo-primary" disabled={isSubmitting}>
           {isSubmitting ? 'Saving...' : provider ? 'Update Provider' : 'Add Provider'}
         </Button>
       </div>
