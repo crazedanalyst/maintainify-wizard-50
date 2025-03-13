@@ -1,10 +1,18 @@
 
-import { useState, useEffect } from 'react';
-import { Menu, Bell, Search, X } from 'lucide-react';
+import { useState } from 'react';
+import { Menu, Bell, Search, X, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useApp } from '@/context/AppContext';
-import { getRelativeTime } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface HeaderProps {
@@ -14,6 +22,7 @@ interface HeaderProps {
 
 const Header = ({ toggleSidebar, sidebarOpen }: HeaderProps) => {
   const { trialInfo } = useApp();
+  const { user, logout } = useAuth();
   const isMobile = useIsMobile();
   const [showSearch, setShowSearch] = useState(false);
   
@@ -62,6 +71,28 @@ const Header = ({ toggleSidebar, sidebarOpen }: HeaderProps) => {
                   </span>
                 </div>
               )}
+              
+              {/* User dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <User className="h-5 w-5" />
+                    {!isMobile && <span>{user?.name}</span>}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => window.location.href = '/accounts'}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer" onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           )}
         </div>
