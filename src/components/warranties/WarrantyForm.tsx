@@ -22,7 +22,7 @@ import {
 import { cn, formatDate } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 interface WarrantyFormProps {
   warranty?: Warranty;
@@ -147,6 +147,10 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
 
   const processOCR = async (file: File) => {
     setIsProcessingOCR(true);
+    toast({
+      title: 'Processing Document',
+      description: 'Reading warranty information from your document...',
+    });
     
     try {
       // Create a FileReader to read file content
@@ -154,19 +158,19 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
       
       reader.onloadend = async () => {
         const base64data = reader.result;
-        const supabase = createClient(
-          import.meta.env.VITE_SUPABASE_URL || '', 
-          import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-        );
         
+        console.log('Calling OCR function...');
         // Call Supabase edge function for OCR processing
         const { data, error } = await supabase.functions.invoke('warranty-ocr', {
           body: { fileBase64: base64data }
         });
         
         if (error) {
+          console.error('OCR function error:', error);
           throw new Error(`OCR function error: ${error.message}`);
         }
+        
+        console.log('OCR function response:', data);
         
         if (data && data.success) {
           // Update form fields with extracted information
@@ -203,6 +207,7 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
           });
         } else {
           // Fall back to simulated data for demo purposes
+          console.log('OCR processing failed or no data extracted, using simulated data');
           simulateOcrExtraction();
         }
       };

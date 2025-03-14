@@ -20,9 +20,15 @@ serve(async (req) => {
       throw new Error('OCR_SPACE_API_KEY is not set in environment');
     }
 
+    console.log('OCR_API_KEY is present and configured');
+
     // Parse request body
-    const { fileBase64 } = await req.json();
+    const requestData = await req.json();
+    console.log('Request received with data:', Object.keys(requestData));
+    
+    const { fileBase64 } = requestData;
     if (!fileBase64) {
+      console.error('No file data provided in request');
       return new Response(
         JSON.stringify({ error: 'No file data provided' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -31,6 +37,7 @@ serve(async (req) => {
 
     // Extract file data
     const base64Data = fileBase64.split(',')[1];
+    console.log('Base64 data extracted, length:', base64Data.length);
 
     // Call OCR.space API
     console.log('Calling OCR.space API');
@@ -47,11 +54,13 @@ serve(async (req) => {
       body: formData
     });
 
+    console.log('OCR API response status:', ocrResponse.status);
     const ocrData = await ocrResponse.json();
-    console.log('OCR response received');
+    console.log('OCR response received:', JSON.stringify(ocrData).substring(0, 200) + '...');
 
     // Process OCR data to extract warranty information
     const parsedData = extractWarrantyInfo(ocrData);
+    console.log('Extracted warranty info:', parsedData);
     
     return new Response(
       JSON.stringify(parsedData),
@@ -78,14 +87,18 @@ function extractWarrantyInfo(ocrData: any) {
   };
 
   if (!ocrData.ParsedResults || ocrData.ParsedResults.length === 0) {
+    console.log('No parsed results in OCR data');
     return result;
   }
 
   // Get the parsed text
   const parsedText = ocrData.ParsedResults[0].ParsedText;
   if (!parsedText) {
+    console.log('No parsed text in OCR results');
     return result;
   }
+
+  console.log('OCR parsed text:', parsedText);
 
   // Extract information using regex and natural language processing
   const lines = parsedText.split('\n').map(line => line.trim());
@@ -120,10 +133,13 @@ function extractWarrantyInfo(ocrData: any) {
       
       if (productMatch && productMatch[1]) {
         result.itemName = productMatch[1].trim();
+        console.log('Found product name:', result.itemName);
       } else if (itemMatch && itemMatch[1]) {
         result.itemName = itemMatch[1].trim();
+        console.log('Found item name:', result.itemName);
       } else if (modelMatch && modelMatch[1]) {
         result.itemName = modelMatch[1].trim();
+        console.log('Found model:', result.itemName);
       }
     }
     
@@ -134,8 +150,10 @@ function extractWarrantyInfo(ocrData: any) {
       
       if (manufacturerMatch && manufacturerMatch[1]) {
         result.manufacturer = manufacturerMatch[1].trim();
+        console.log('Found manufacturer:', result.manufacturer);
       } else if (brandMatch && brandMatch[1]) {
         result.manufacturer = brandMatch[1].trim();
+        console.log('Found brand:', result.manufacturer);
       }
     }
     
@@ -146,8 +164,10 @@ function extractWarrantyInfo(ocrData: any) {
       
       if (purchaseDateMatch && purchaseDateMatch[1]) {
         result.purchaseDate = purchaseDateMatch[1].trim();
+        console.log('Found purchase date:', result.purchaseDate);
       } else if (boughtDateMatch && boughtDateMatch[3]) {
         result.purchaseDate = boughtDateMatch[3].trim();
+        console.log('Found bought date:', result.purchaseDate);
       }
     }
     
@@ -158,8 +178,10 @@ function extractWarrantyInfo(ocrData: any) {
       
       if (expiryDateMatch && expiryDateMatch[2]) {
         result.expiryDate = expiryDateMatch[2].trim();
+        console.log('Found expiry date:', result.expiryDate);
       } else if (warrantyUntilMatch && warrantyUntilMatch[2]) {
         result.expiryDate = warrantyUntilMatch[2].trim();
+        console.log('Found warranty until date:', result.expiryDate);
       }
     }
     
@@ -170,8 +192,10 @@ function extractWarrantyInfo(ocrData: any) {
       
       if (descriptionMatch && descriptionMatch[1]) {
         result.description = descriptionMatch[1].trim();
+        console.log('Found description:', result.description);
       } else if (coverageMatch && coverageMatch[1]) {
         result.description = coverageMatch[1].trim();
+        console.log('Found coverage:', result.description);
       }
     }
   }
@@ -179,6 +203,9 @@ function extractWarrantyInfo(ocrData: any) {
   // If we found any data, consider it a success
   if (result.itemName || result.manufacturer || result.purchaseDate || result.expiryDate || result.description) {
     result.success = true;
+    console.log('Successfully extracted warranty information');
+  } else {
+    console.log('No warranty information extracted');
   }
   
   return result;
