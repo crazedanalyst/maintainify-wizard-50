@@ -1,17 +1,12 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/context/AuthContext';
 
-interface LayoutProps {
-  children: React.ReactNode;
-  requireAuth?: boolean;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children, requireAuth = true }) => {
+const Layout = () => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = React.useState(!isMobile);
   const { isAuthenticated, isLoading } = useAuth();
@@ -28,21 +23,21 @@ const Layout: React.FC<LayoutProps> = ({ children, requireAuth = true }) => {
     );
   }
   
-  // Redirect to login if authentication is required but user is not authenticated
-  if (requireAuth && !isAuthenticated) {
+  // Redirect to login if user is not authenticated
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
   
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar (only show if authenticated) */}
-      {isAuthenticated && <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />}
+      {/* Sidebar */}
+      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       
       {/* Main content */}
       <div className="flex-1 flex flex-col">
-        {isAuthenticated && <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />}
+        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
         <main className="p-4 sm:p-6 md:p-8">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>

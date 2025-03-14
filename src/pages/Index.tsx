@@ -1,7 +1,5 @@
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/context/AppContext';
 import { getRelativeTime, formatDate, getPriorityLevel, getPriorityColor, groupTasksByPriority } from '@/lib/utils';
@@ -52,7 +50,7 @@ const Dashboard = () => {
   };
   
   return (
-    <Layout>
+    <>
       {trialInfo.isActive && (
         <div className="animate-fade-in mb-6 p-4 rounded-lg bg-gradient-to-r from-brand-500 to-brand-600 text-white">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
@@ -248,7 +246,7 @@ const Dashboard = () => {
           <Button onClick={() => navigate('/settings')}>Add Property</Button>
         </div>
       )}
-    </Layout>
+    </>
   );
 };
 
