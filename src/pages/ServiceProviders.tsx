@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { ServiceProvider } from '@/lib/db-service';
 import { Button } from '@/components/ui/button';
@@ -40,7 +39,7 @@ const ServiceProviders = () => {
   filteredProviders.sort((a, b) => b.rating - a.rating);
 
   return (
-    <Layout>
+    <>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Service Providers</h1>
         <p className="text-gray-500">Manage your service provider contacts and reviews</p>
@@ -116,7 +115,7 @@ const ServiceProviders = () => {
           />
         </DialogContent>
       </Dialog>
-    </Layout>
+    </>
   );
 };
 

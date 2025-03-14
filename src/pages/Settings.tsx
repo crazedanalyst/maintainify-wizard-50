@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { Property } from '@/lib/db-service';
 import { Button } from '@/components/ui/button';
@@ -26,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import PropertyForm from '@/components/properties/PropertyForm';
 import { toast } from '@/hooks/use-toast';
+import { Badge } from "@/components/ui/badge";
 
 const Settings = () => {
   const { properties, selectedProperty, setSelectedProperty, deleteProperty, trialInfo } = useApp();
@@ -79,7 +79,7 @@ const Settings = () => {
   };
 
   return (
-    <Layout>
+    <>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
         <p className="text-gray-500">Manage your properties and application settings</p>
@@ -284,11 +284,8 @@ const Settings = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Layout>
+    </>
   );
 };
-
-// Ensure we import the Badge component
-import { Badge } from "@/components/ui/badge";
 
 export default Settings;

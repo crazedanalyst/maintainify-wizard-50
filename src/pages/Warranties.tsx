@@ -1,6 +1,4 @@
-
 import { useState } from 'react';
-import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { Warranty } from '@/lib/db-service';
 import { formatDate, getRelativeTime } from '@/lib/utils';
@@ -110,7 +108,7 @@ const Warranties = () => {
   };
 
   return (
-    <Layout>
+    <>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Warranty Management</h1>
         <p className="text-gray-500">Keep track of your product warranties and expiration dates</p>
@@ -321,7 +319,7 @@ const Warranties = () => {
           <Button>Add Property</Button>
         </div>
       )}
-    </Layout>
+    </>
   );
 };
 

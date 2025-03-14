@@ -1,6 +1,4 @@
-
 import { useState } from 'react';
-import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { MaintenanceTask } from '@/lib/db-service';
 import { formatDate, getRelativeTime, getPriorityLevel, getPriorityColor } from '@/lib/utils';
@@ -142,7 +140,7 @@ const Maintenance = () => {
   };
 
   return (
-    <Layout>
+    <>
       <div className="mb-6 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Maintenance Schedule</h1>
         <p className="text-gray-600">Track and manage your home maintenance tasks</p>
@@ -344,7 +342,7 @@ const Maintenance = () => {
           <Button className="bg-purple-600 hover:bg-purple-700">Add Property</Button>
         </div>
       )}
-    </Layout>
+    </>
   );
 };
 

@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -126,7 +125,7 @@ const Accounts = () => {
   };
 
   return (
-    <Layout>
+    <>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Account Management</h1>
         <p className="text-gray-500">Manage your account and subscription</p>
@@ -554,7 +553,7 @@ const Accounts = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Layout>
+    </>
   );
 };
 
