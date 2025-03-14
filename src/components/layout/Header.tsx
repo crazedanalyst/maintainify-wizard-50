@@ -26,6 +26,9 @@ const Header = ({ toggleSidebar, sidebarOpen }: HeaderProps) => {
   const isMobile = useIsMobile();
   const [showSearch, setShowSearch] = useState(false);
   
+  // Get display name from user metadata or fall back to email
+  const userDisplayName = user?.user_metadata?.name || user?.email || 'User';
+  
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm backdrop-filter backdrop-blur-lg bg-opacity-90">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6">
@@ -77,7 +80,7 @@ const Header = ({ toggleSidebar, sidebarOpen }: HeaderProps) => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="gap-2">
                     <User className="h-5 w-5" />
-                    {!isMobile && <span>{user?.name}</span>}
+                    {!isMobile && <span>{userDisplayName}</span>}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
