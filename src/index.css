@@ -139,10 +139,56 @@
   .neo-stat-card {
     @apply flex flex-col items-center justify-center p-6 bg-white rounded-xl shadow-neo;
   }
+  
+  /* Glassmorphism components */
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-lg;
+  }
+  
+  .glass-card {
+    @apply bg-white/60 backdrop-filter backdrop-blur-lg rounded-2xl border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+  
+  .glass-input {
+    @apply bg-white/50 backdrop-blur-md border border-white/30 focus:border-brand-300 focus:bg-white/70 transition-all duration-300;
+  }
+  
+  .glass-button {
+    @apply bg-white/50 backdrop-blur-md hover:bg-white/70 transition-all duration-300 shadow-md hover:shadow-lg;
+  }
+  
+  .glass-sidebar {
+    @apply bg-sidebar/80 backdrop-blur-md border-r border-sidebar-border/30;
+  }
+  
+  .glass-header {
+    @apply bg-white/70 backdrop-blur-md border-b border-gray-200/50 shadow-sm;
+  }
+  
+  /* Microanimations */
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+  }
+  
+  .pulse-on-hover {
+    @apply hover:animate-pulse;
+  }
+  
+  .spin-on-hover {
+    @apply hover:animate-spin;
+  }
+  
+  .scale-on-hover {
+    @apply hover:scale-105 transition-transform duration-300;
+  }
+  
+  .rotate-on-hover {
+    @apply hover:rotate-3 transition-transform duration-300;
+  }
 }
 
 .glass-card {
-  @apply bg-white bg-opacity-50 backdrop-filter backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-lg;
+  @apply bg-white/50 backdrop-filter backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-lg;
 }
 
 .shimmer {
@@ -165,4 +211,49 @@
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-gentle {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 4s ease-in-out infinite;
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 15s linear infinite;
+}
+
+.transition-card {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Stagger children animations */
+.stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.6s; }
+
+/* Glassmorphism background elements */
+.glass-orb {
+  @apply absolute rounded-full opacity-20 blur-3xl;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 70%, rgba(59, 130, 246, 0) 100%);
 }
