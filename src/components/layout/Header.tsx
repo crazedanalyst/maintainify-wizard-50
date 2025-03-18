@@ -1,4 +1,6 @@
+
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Menu, Bell, Search, X, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,14 +8,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 interface HeaderProps {
   toggleSidebar: () => void;
   sidebarOpen: boolean;
 }
+
 const Header = ({
   toggleSidebar,
   sidebarOpen
 }: HeaderProps) => {
+  const navigate = useNavigate();
   const {
     trialInfo
   } = useApp();
@@ -26,7 +31,9 @@ const Header = ({
 
   // Get display name from user metadata or fall back to email
   const userDisplayName = user?.user_metadata?.name || user?.email || 'User';
-  return <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm backdrop-filter backdrop-blur-lg bg-opacity-90">
+  
+  return (
+    <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm backdrop-filter backdrop-blur-lg bg-opacity-90">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6">
         <div className="flex items-center">
           <Button variant="ghost" size="sm" onClick={toggleSidebar} className="mr-2">
@@ -36,23 +43,28 @@ const Header = ({
         </div>
         
         <div className="flex items-center space-x-2">
-          {showSearch ? <div className="relative flex items-center">
+          {showSearch ? (
+            <div className="relative flex items-center">
               <Input type="search" placeholder="Search..." className="w-full sm:w-64 h-9" autoFocus />
               <Button variant="ghost" size="sm" className="absolute right-0" onClick={() => setShowSearch(false)}>
                 <X className="h-4 w-4" />
               </Button>
-            </div> : <>
+            </div>
+          ) : (
+            <>
               <Button variant="ghost" size="sm" onClick={() => setShowSearch(true)}>
                 <Search className="h-5 w-5" />
               </Button>
               <Button variant="ghost" size="sm">
                 <Bell className="h-5 w-5" />
               </Button>
-              {trialInfo.isActive && <div className="hidden md:block text-sm font-medium">
+              {trialInfo.isActive && (
+                <div className="hidden md:block text-sm font-medium">
                   <span className="px-2 py-1 rounded-full bg-brand-100 text-brand-700">
                     Trial: {trialInfo.daysLeft} days left
                   </span>
-                </div>}
+                </div>
+              )}
               
               {/* User dropdown */}
               <DropdownMenu>
@@ -65,7 +77,7 @@ const Header = ({
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer" onClick={() => window.location.href = '/accounts'}>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/dashboard/accounts')}>
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
@@ -75,9 +87,12 @@ const Header = ({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </>}
+            </>
+          )}
         </div>
       </div>
-    </header>;
+    </header>
+  );
 };
+
 export default Header;

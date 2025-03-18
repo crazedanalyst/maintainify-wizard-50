@@ -32,7 +32,7 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
   
@@ -130,6 +130,12 @@ const Login = () => {
               
               <div className="text-center text-sm text-gray-500">
                 <p>First time? <Link to="/register" className="font-medium text-brand-600 hover:text-brand-500">Create an account</Link></p>
+              </div>
+              
+              <div className="text-center text-sm text-gray-500">
+                <Link to="/" className="font-medium text-brand-600 hover:text-brand-500">
+                  Back to home
+                </Link>
               </div>
             </form>
           </Form>

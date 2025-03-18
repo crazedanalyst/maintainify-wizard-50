@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: 'Login successful',
         description: 'Welcome back!',
       });
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         title: 'Login failed',
@@ -148,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: 'Logged out',
         description: 'You have been logged out successfully',
       });
-      navigate('/login');
+      navigate('/');
     } catch (error: any) {
       toast({
         title: 'Logout failed',

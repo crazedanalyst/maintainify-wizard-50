@@ -5,7 +5,7 @@ import {
   Home, 
   Calendar, 
   FileText, 
-  Wrench, // Replaced Tool with Wrench
+  Wrench,
   Users, 
   Settings, 
   ChevronLeft,
@@ -38,12 +38,12 @@ const Sidebar = ({ open, setOpen }: SidebarProps) => {
   
   // Navigation items
   const navItems = [
-    { icon: Home, label: 'Dashboard', path: '/' },
-    { icon: Calendar, label: 'Maintenance', path: '/maintenance' },
-    { icon: FileText, label: 'Warranties', path: '/warranties' },
-    { icon: Wrench, label: 'Service Providers', path: '/providers' }, // Updated icon here
-    { icon: Users, label: 'Accounts', path: '/accounts' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: Home, label: 'Dashboard', path: '/dashboard' },
+    { icon: Calendar, label: 'Maintenance', path: '/dashboard/maintenance' },
+    { icon: FileText, label: 'Warranties', path: '/dashboard/warranties' },
+    { icon: Wrench, label: 'Service Providers', path: '/dashboard/providers' },
+    { icon: Users, label: 'Accounts', path: '/dashboard/accounts' },
+    { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
   ];
   
   return (
