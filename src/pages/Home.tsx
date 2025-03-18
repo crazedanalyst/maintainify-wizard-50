@@ -1,12 +1,9 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Shield, Home, Wrench, FileText, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
 const HomePage = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+  return <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white overflow-hidden">
       {/* Navigation */}
       <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,13 +55,7 @@ const HomePage = () => {
             </div>
             <div className="md:w-1/2 mt-12 md:mt-0">
               <div className="bg-white/70 backdrop-blur-lg p-6 rounded-2xl shadow-neo rotate-1 hover:rotate-0 transition-all duration-500">
-                <img 
-                  src="/placeholder.svg" 
-                  alt="Dashboard preview" 
-                  className="rounded-lg border border-gray-200 transform hover:scale-[1.02] transition-all duration-500"
-                  width="100%"
-                  height="auto"
-                />
+                <img alt="Dashboard preview" className="rounded-lg border border-gray-200 transform hover:scale-[1.02] transition-all duration-500" width="100%" height="auto" src="/lovable-uploads/a8383a1b-adbb-4f9d-abe5-0f81da170d3d.jpg" />
               </div>
             </div>
           </div>
@@ -82,14 +73,7 @@ const HomePage = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <FeatureCard 
-                key={index}
-                icon={feature.icon}
-                title={feature.title}
-                description={feature.description}
-              />
-            ))}
+            {features.map((feature, index) => <FeatureCard key={index} icon={feature.icon} title={feature.title} description={feature.description} />)}
           </div>
         </div>
       </div>
@@ -134,38 +118,36 @@ const HomePage = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
-const features = [
-  {
-    icon: <Home className="h-10 w-10 text-brand-500" />,
-    title: "Maintenance Tracking",
-    description: "Never miss a maintenance task with automatic reminders and scheduling"
-  },
-  {
-    icon: <FileText className="h-10 w-10 text-brand-500" />,
-    title: "Warranty Management",
-    description: "Keep all your warranty information in one place with expiration alerts"
-  },
-  {
-    icon: <Wrench className="h-10 w-10 text-brand-500" />,
-    title: "Service Provider Directory",
-    description: "Store contact information for all your trusted service providers"
-  }
-];
-
-const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => {
-  return (
-    <div className="bg-white/50 backdrop-blur-sm p-8 rounded-2xl shadow-neo-sm hover:shadow-neo transition-all duration-300 border border-gray-100 group">
+const features = [{
+  icon: <Home className="h-10 w-10 text-brand-500" />,
+  title: "Maintenance Tracking",
+  description: "Never miss a maintenance task with automatic reminders and scheduling"
+}, {
+  icon: <FileText className="h-10 w-10 text-brand-500" />,
+  title: "Warranty Management",
+  description: "Keep all your warranty information in one place with expiration alerts"
+}, {
+  icon: <Wrench className="h-10 w-10 text-brand-500" />,
+  title: "Service Provider Directory",
+  description: "Store contact information for all your trusted service providers"
+}];
+const FeatureCard = ({
+  icon,
+  title,
+  description
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) => {
+  return <div className="bg-white/50 backdrop-blur-sm p-8 rounded-2xl shadow-neo-sm hover:shadow-neo transition-all duration-300 border border-gray-100 group">
       <div className="inline-flex items-center justify-center p-3 bg-brand-50 rounded-xl mb-6 group-hover:bg-brand-100 transition-colors duration-300">
         {icon}
       </div>
       <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
       <p className="text-gray-600">{description}</p>
-    </div>
-  );
+    </div>;
 };
-
 export default HomePage;
