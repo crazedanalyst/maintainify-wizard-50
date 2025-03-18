@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Shield, Home, Tool, FileText } from 'lucide-react';
+import { ArrowRight, Shield, Home, Wrench, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const HomePage = () => {
@@ -86,7 +86,7 @@ const HomePage = () => {
               description="Keep all your warranty information in one place with expiration alerts"
             />
             <FeatureCard 
-              icon={<Tool className="h-10 w-10 text-brand-500" />}
+              icon={<Wrench className="h-10 w-10 text-brand-500" />}
               title="Service Provider Directory"
               description="Store contact information for all your trusted service providers"
             />
