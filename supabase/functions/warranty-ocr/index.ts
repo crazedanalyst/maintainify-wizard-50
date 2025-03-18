@@ -57,13 +57,28 @@ serve(async (req) => {
     console.log('OCR API response status:', ocrResponse.status);
     const ocrData = await ocrResponse.json();
     console.log('OCR response received:', JSON.stringify(ocrData).substring(0, 200) + '...');
+    
+    if (ocrData.ErrorMessage) {
+      console.error('OCR API returned an error:', ocrData.ErrorMessage);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: ocrData.ErrorMessage,
+          rawText: ocrData.ParsedResults?.[0]?.ParsedText || null
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Process OCR data to extract warranty information
     const parsedData = extractWarrantyInfo(ocrData);
     console.log('Extracted warranty info:', parsedData);
     
     return new Response(
-      JSON.stringify(parsedData),
+      JSON.stringify({
+        ...parsedData,
+        rawText: ocrData.ParsedResults?.[0]?.ParsedText || null
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
@@ -103,101 +118,152 @@ function extractWarrantyInfo(ocrData: any) {
   // Extract information using regex and natural language processing
   const lines = parsedText.split('\n').map(line => line.trim());
   
-  // Find product name
-  const productRegex = /product\s*name[:\s]+([^\n]+)/i;
+  // More aggressive pattern matching
+  // Find product name - look for any line that might contain a product name
+  const productRegex = /product\s*(?:name)?[:\s]+([^\n]+)/i;
   const itemRegex = /item[:\s]+([^\n]+)/i;
   const modelRegex = /model[:\s]+([^\n]+)/i;
+  const nameRegex = /name[:\s]+([^\n]+)/i;
   
   // Find manufacturer
   const manufacturerRegex = /manufacturer[:\s]+([^\n]+)/i;
   const brandRegex = /brand[:\s]+([^\n]+)/i;
+  const companyRegex = /(?:by|from)\s+([A-Z][a-zA-Z\s]+)(?:,|\.|$)/i;
   
-  // Find dates
-  const purchaseDateRegex = /purchase\s*date[:\s]+([^\n]+)/i;
-  const boughtDateRegex = /(bought|purchased)(\s+on)?[:\s]+([^\n]+)/i;
+  // Find dates - more flexible date patterns
+  const purchaseDateRegex = /(?:purchase|bought|acquired)(?:\s*date)?[:\s]+([^\n]+)/i;
+  const dateOfPurchaseRegex = /date\s+of\s+purchase[:\s]+([^\n]+)/i;
   
-  const expiryDateRegex = /expir(y|ation)\s*date[:\s]+([^\n]+)/i;
-  const warrantyUntilRegex = /warranty(\s+valid)?\s+until[:\s]+([^\n]+)/i;
+  const expiryDateRegex = /(?:expiry|expiration|warranty\s+end)(?:\s*date)?[:\s]+([^\n]+)/i;
+  const warrantyUntilRegex = /warranty(?:\s+valid)?(?:\s+until)?[:\s]+([^\n]+)/i;
+  const validUntilRegex = /valid\s+until[:\s]+([^\n]+)/i;
   
   // Find description
   const descriptionRegex = /description[:\s]+([^\n]+)/i;
   const coverageRegex = /coverage[:\s]+([^\n]+)/i;
+  const warrantyCoverageRegex = /warranty\s+(?:covers|includes)[:\s]+([^\n]+)/i;
 
-  // Extract data from text
-  for (const line of lines) {
-    // Extract item name
-    if (!result.itemName) {
-      const productMatch = line.match(productRegex);
-      const itemMatch = line.match(itemRegex);
-      const modelMatch = line.match(modelRegex);
-      
-      if (productMatch && productMatch[1]) {
-        result.itemName = productMatch[1].trim();
-        console.log('Found product name:', result.itemName);
-      } else if (itemMatch && itemMatch[1]) {
-        result.itemName = itemMatch[1].trim();
-        console.log('Found item name:', result.itemName);
-      } else if (modelMatch && modelMatch[1]) {
-        result.itemName = modelMatch[1].trim();
-        console.log('Found model:', result.itemName);
+  // Extract item name from full text if not found in lines
+  const fullTextProductMatch = parsedText.match(productRegex);
+  const fullTextItemMatch = parsedText.match(itemRegex);
+  const fullTextModelMatch = parsedText.match(modelRegex);
+  const fullTextNameMatch = parsedText.match(nameRegex);
+  
+  if (fullTextProductMatch && fullTextProductMatch[1]) {
+    result.itemName = fullTextProductMatch[1].trim();
+    console.log('Found product name in full text:', result.itemName);
+  } else if (fullTextItemMatch && fullTextItemMatch[1]) {
+    result.itemName = fullTextItemMatch[1].trim();
+    console.log('Found item name in full text:', result.itemName);
+  } else if (fullTextModelMatch && fullTextModelMatch[1]) {
+    result.itemName = fullTextModelMatch[1].trim();
+    console.log('Found model in full text:', result.itemName);
+  } else if (fullTextNameMatch && fullTextNameMatch[1]) {
+    result.itemName = fullTextNameMatch[1].trim();
+    console.log('Found name in full text:', result.itemName);
+  }
+  
+  // Try to find the first capitalized multi-word sequence as potential product name
+  if (!result.itemName) {
+    const capitalizedProductPattern = /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\s+(?:TV|Refrigerator|Washing Machine|Dryer|Microwave|Oven|Dishwasher|[A-Z0-9-]+))/;
+    const capitalizedMatch = parsedText.match(capitalizedProductPattern);
+    if (capitalizedMatch && capitalizedMatch[1]) {
+      result.itemName = capitalizedMatch[1].trim();
+      console.log('Found capitalized product name:', result.itemName);
+    }
+  }
+
+  // Extract manufacturer from full text
+  const fullTextManufacturerMatch = parsedText.match(manufacturerRegex);
+  const fullTextBrandMatch = parsedText.match(brandRegex);
+  const fullTextCompanyMatch = parsedText.match(companyRegex);
+  
+  if (fullTextManufacturerMatch && fullTextManufacturerMatch[1]) {
+    result.manufacturer = fullTextManufacturerMatch[1].trim();
+    console.log('Found manufacturer in full text:', result.manufacturer);
+  } else if (fullTextBrandMatch && fullTextBrandMatch[1]) {
+    result.manufacturer = fullTextBrandMatch[1].trim();
+    console.log('Found brand in full text:', result.manufacturer);
+  } else if (fullTextCompanyMatch && fullTextCompanyMatch[1]) {
+    result.manufacturer = fullTextCompanyMatch[1].trim();
+    console.log('Found company in full text:', result.manufacturer);
+  }
+
+  // Extract dates from full text
+  const fullTextPurchaseDateMatch = parsedText.match(purchaseDateRegex) || parsedText.match(dateOfPurchaseRegex);
+  if (fullTextPurchaseDateMatch && fullTextPurchaseDateMatch[1]) {
+    result.purchaseDate = fullTextPurchaseDateMatch[1].trim();
+    console.log('Found purchase date in full text:', result.purchaseDate);
+  }
+  
+  const fullTextExpiryDateMatch = parsedText.match(expiryDateRegex) || 
+                                parsedText.match(warrantyUntilRegex) || 
+                                parsedText.match(validUntilRegex);
+  if (fullTextExpiryDateMatch && fullTextExpiryDateMatch[1]) {
+    result.expiryDate = fullTextExpiryDateMatch[1].trim();
+    console.log('Found expiry date in full text:', result.expiryDate);
+  }
+
+  // Extract description from full text
+  const fullTextDescriptionMatch = parsedText.match(descriptionRegex) || 
+                                 parsedText.match(coverageRegex) || 
+                                 parsedText.match(warrantyCoverageRegex);
+  if (fullTextDescriptionMatch && fullTextDescriptionMatch[1]) {
+    result.description = fullTextDescriptionMatch[1].trim();
+    console.log('Found description in full text:', result.description);
+  }
+
+  // Look for date patterns in all lines
+  if (!result.purchaseDate || !result.expiryDate) {
+    const datePattern = /\b(?:\d{1,2}[-\/\.]\d{1,2}[-\/\.]\d{2,4}|\d{2,4}[-\/\.]\d{1,2}[-\/\.]\d{1,2}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{2,4}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{2,4})\b/i;
+    
+    let dates: string[] = [];
+    
+    // Extract all dates from the text
+    for (const line of lines) {
+      const match = line.match(datePattern);
+      if (match) {
+        dates.push(match[0]);
       }
     }
     
-    // Extract manufacturer
-    if (!result.manufacturer) {
-      const manufacturerMatch = line.match(manufacturerRegex);
-      const brandMatch = line.match(brandRegex);
-      
-      if (manufacturerMatch && manufacturerMatch[1]) {
-        result.manufacturer = manufacturerMatch[1].trim();
-        console.log('Found manufacturer:', result.manufacturer);
-      } else if (brandMatch && brandMatch[1]) {
-        result.manufacturer = brandMatch[1].trim();
-        console.log('Found brand:', result.manufacturer);
-      }
+    // If we found at least one date but don't have purchase date
+    if (dates.length > 0 && !result.purchaseDate) {
+      result.purchaseDate = dates[0];
+      console.log('Using first detected date as purchase date:', result.purchaseDate);
     }
     
-    // Extract purchase date
-    if (!result.purchaseDate) {
-      const purchaseDateMatch = line.match(purchaseDateRegex);
-      const boughtDateMatch = line.match(boughtDateRegex);
-      
-      if (purchaseDateMatch && purchaseDateMatch[1]) {
-        result.purchaseDate = purchaseDateMatch[1].trim();
-        console.log('Found purchase date:', result.purchaseDate);
-      } else if (boughtDateMatch && boughtDateMatch[3]) {
-        result.purchaseDate = boughtDateMatch[3].trim();
-        console.log('Found bought date:', result.purchaseDate);
-      }
+    // If we found at least two dates but don't have expiry date
+    if (dates.length > 1 && !result.expiryDate) {
+      result.expiryDate = dates[1];
+      console.log('Using second detected date as expiry date:', result.expiryDate);
     }
+  }
+
+  // Look for any phrases describing what the warranty covers
+  if (!result.description) {
+    const coveragePatterns = [
+      /warranty covers ([^.]+)\./i,
+      /coverage includes ([^.]+)\./i,
+      /covers ([^.]+) for a period of/i,
+      /this warranty ([^.]+)\./i
+    ];
     
-    // Extract expiry date
-    if (!result.expiryDate) {
-      const expiryDateMatch = line.match(expiryDateRegex);
-      const warrantyUntilMatch = line.match(warrantyUntilRegex);
-      
-      if (expiryDateMatch && expiryDateMatch[2]) {
-        result.expiryDate = expiryDateMatch[2].trim();
-        console.log('Found expiry date:', result.expiryDate);
-      } else if (warrantyUntilMatch && warrantyUntilMatch[2]) {
-        result.expiryDate = warrantyUntilMatch[2].trim();
-        console.log('Found warranty until date:', result.expiryDate);
+    for (const pattern of coveragePatterns) {
+      const match = parsedText.match(pattern);
+      if (match && match[1]) {
+        result.description = match[1].trim();
+        console.log('Found warranty coverage description:', result.description);
+        break;
       }
     }
-    
-    // Extract description
-    if (!result.description) {
-      const descriptionMatch = line.match(descriptionRegex);
-      const coverageMatch = line.match(coverageRegex);
-      
-      if (descriptionMatch && descriptionMatch[1]) {
-        result.description = descriptionMatch[1].trim();
-        console.log('Found description:', result.description);
-      } else if (coverageMatch && coverageMatch[1]) {
-        result.description = coverageMatch[1].trim();
-        console.log('Found coverage:', result.description);
-      }
-    }
+  }
+
+  // If we still don't have a description, use a fallback
+  if (!result.description && result.itemName) {
+    // Create a generic description based on the product name
+    result.description = `Standard warranty coverage for ${result.itemName}`;
+    console.log('Using generic description based on product name');
   }
 
   // If we found any data, consider it a success

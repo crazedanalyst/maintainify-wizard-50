@@ -47,6 +47,7 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isProcessingOCR, setIsProcessingOCR] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [ocrRawText, setOcrRawText] = useState<string | null>(null);
   
   // Form state
   const [itemName, setItemName] = useState('');
@@ -172,38 +173,69 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
         
         console.log('OCR function response:', data);
         
-        if (data && data.success) {
+        if (data) {
+          // Store raw text for debugging
+          if (data.rawText) {
+            setOcrRawText(data.rawText);
+            console.log('Raw OCR text:', data.rawText);
+          }
+          
           // Update form fields with extracted information
-          if (data.itemName && !itemName) setItemName(data.itemName);
-          if (data.manufacturer && !manufacturer) setManufacturer(data.manufacturer);
-          if (data.description && !description) setDescription(data.description);
+          if (data.itemName) {
+            console.log('Setting item name to:', data.itemName);
+            setItemName(data.itemName);
+          }
+          
+          if (data.manufacturer) {
+            console.log('Setting manufacturer to:', data.manufacturer);
+            setManufacturer(data.manufacturer);
+          }
+          
+          if (data.description) {
+            console.log('Setting description to:', data.description);
+            setDescription(data.description);
+          }
           
           // Handle date fields
           if (data.purchaseDate) {
             try {
-              const extractedPurchaseDate = new Date(data.purchaseDate);
-              if (!isNaN(extractedPurchaseDate.getTime())) {
+              console.log('Attempting to parse purchase date:', data.purchaseDate);
+              // Try different date formats
+              let extractedPurchaseDate = tryParseDate(data.purchaseDate);
+              
+              if (extractedPurchaseDate) {
+                console.log('Successfully parsed purchase date:', extractedPurchaseDate);
                 setPurchaseDate(extractedPurchaseDate);
+              } else {
+                console.warn('Could not parse purchase date:', data.purchaseDate);
               }
             } catch (e) {
-              console.warn('Could not parse purchase date:', e);
+              console.warn('Error parsing purchase date:', e);
             }
           }
           
           if (data.expiryDate) {
             try {
-              const extractedExpiryDate = new Date(data.expiryDate);
-              if (!isNaN(extractedExpiryDate.getTime())) {
+              console.log('Attempting to parse expiry date:', data.expiryDate);
+              // Try different date formats
+              let extractedExpiryDate = tryParseDate(data.expiryDate);
+              
+              if (extractedExpiryDate) {
+                console.log('Successfully parsed expiry date:', extractedExpiryDate);
                 setExpiryDate(extractedExpiryDate);
+              } else {
+                console.warn('Could not parse expiry date:', data.expiryDate);
               }
             } catch (e) {
-              console.warn('Could not parse expiry date:', e);
+              console.warn('Error parsing expiry date:', e);
             }
           }
           
           toast({
-            title: 'Document Processed',
-            description: 'Information has been extracted from the document.',
+            title: data.success ? 'Document Processed' : 'Limited Information Extracted',
+            description: data.success 
+              ? 'Information has been extracted from the document and applied to the form.'
+              : 'Could only extract limited information from the document.',
           });
         } else {
           // Fall back to simulated data for demo purposes
@@ -227,6 +259,83 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
     } finally {
       setIsProcessingOCR(false);
     }
+  };
+  
+  // Helper function to try parsing dates in different formats
+  const tryParseDate = (dateString: string): Date | null => {
+    // Clean the date string
+    const cleaned = dateString.replace(/[\s,]+/g, ' ').trim();
+    
+    const dateFormats = [
+      // Try direct parsing first
+      () => new Date(cleaned),
+      
+      // Try MM/DD/YYYY
+      () => {
+        const match = cleaned.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+        if (match) {
+          return new Date(`${match[1]}/${match[2]}/${match[3].length === 2 ? '20' + match[3] : match[3]}`);
+        }
+        return null;
+      },
+      
+      // Try DD/MM/YYYY
+      () => {
+        const match = cleaned.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+        if (match) {
+          return new Date(`${match[2]}/${match[1]}/${match[3].length === 2 ? '20' + match[3] : match[3]}`);
+        }
+        return null;
+      },
+      
+      // Try YYYY/MM/DD
+      () => {
+        const match = cleaned.match(/(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/);
+        if (match) {
+          return new Date(`${match[2]}/${match[3]}/${match[1]}`);
+        }
+        return null;
+      },
+      
+      // Try Month DD, YYYY
+      () => {
+        const match = cleaned.match(/([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})/);
+        if (match) {
+          const monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+          const month = monthNames.findIndex(m => match[1].toLowerCase().startsWith(m.toLowerCase()));
+          if (month !== -1) {
+            return new Date(Number(match[3]), month, Number(match[2]));
+          }
+        }
+        return null;
+      },
+      
+      // Try DD Month YYYY
+      () => {
+        const match = cleaned.match(/(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\s+(\d{4})/);
+        if (match) {
+          const monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+          const month = monthNames.findIndex(m => match[2].toLowerCase().startsWith(m.toLowerCase()));
+          if (month !== -1) {
+            return new Date(Number(match[3]), month, Number(match[1]));
+          }
+        }
+        return null;
+      }
+    ];
+    
+    for (const formatParser of dateFormats) {
+      try {
+        const parsed = formatParser();
+        if (parsed && !isNaN(parsed.getTime())) {
+          return parsed;
+        }
+      } catch (e) {
+        // Continue to next format
+      }
+    }
+    
+    return null;
   };
   
   // Fallback function for demo purposes
@@ -412,6 +521,17 @@ const WarrantyForm = ({ warranty, onSave, onCancel }: WarrantyFormProps) => {
           <div className="mt-2 flex items-center space-x-2 text-xs text-blue-600">
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
             <span>Processing document with OCR...</span>
+          </div>
+        )}
+        
+        {ocrRawText && (
+          <div className="mt-2 p-2 bg-gray-50 rounded-md">
+            <details className="text-xs">
+              <summary className="cursor-pointer font-medium text-blue-600">View extracted text</summary>
+              <div className="mt-2 whitespace-pre-wrap text-gray-700 text-xs p-2 bg-gray-100 rounded">
+                {ocrRawText}
+              </div>
+            </details>
           </div>
         )}
         
