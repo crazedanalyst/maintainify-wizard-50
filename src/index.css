@@ -142,9 +142,27 @@
 }
 
 .glass-card {
-  @apply bg-white bg-opacity-50 backdrop-filter backdrop-blur-md rounded-lg border border-gray-200 shadow-sm;
+  @apply bg-white bg-opacity-50 backdrop-filter backdrop-blur-md rounded-2xl border border-gray-200/50 shadow-lg;
 }
 
 .shimmer {
   @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent;
+}
+
+.bg-grid-pattern {
+  background-size: 50px 50px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 119, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 119, 255, 0.05) 1px, transparent 1px);
+}
+
+/* Add animations for elements */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
