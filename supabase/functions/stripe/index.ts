@@ -59,17 +59,14 @@ Deno.serve(async (req) => {
     // Handle different actions
     switch (action) {
       case 'create-checkout': {
-        // Create a checkout session with Stripe
+        // Create a checkout session with Stripe using the specific product ID
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ['card'],
           line_items: [
             {
               price_data: {
                 currency: 'usd',
-                product_data: {
-                  name: 'Pro Plan Subscription',
-                  description: 'Unlimited properties, document storage, and premium support',
-                },
+                product: 'prod_RyIYGGjZdHHfIM', // Using the specific product ID
                 unit_amount: 999, // $9.99
                 recurring: {
                   interval: 'month',
