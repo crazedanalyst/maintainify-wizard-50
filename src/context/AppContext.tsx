@@ -10,6 +10,7 @@ import dbService, {
 import notificationService from '@/lib/notification-service';
 import { generateId } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define the context type
 interface AppContextType {
@@ -19,6 +20,7 @@ interface AppContextType {
     daysLeft: number;
     startDate: number;
     endDate: number;
+    isPro?: boolean;
   };
   // Properties
   properties: Property[];
@@ -50,6 +52,8 @@ interface AppContextType {
   isLoading: boolean;
   // Refresh data
   refreshData: () => Promise<void>;
+  // Update trial info
+  updateTrialInfo: (trialData: Partial<AppContextType['trialInfo']>) => Promise<void>;
 }
 
 // Create the context
@@ -62,7 +66,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isActive: true,
     daysLeft: 14,
     startDate: Date.now(),
-    endDate: Date.now() + 14 * 24 * 60 * 60 * 1000
+    endDate: Date.now() + 14 * 24 * 60 * 60 * 1000,
+    isPro: false
   });
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -138,6 +143,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Update trial info
+  const updateTrialInfo = async (trialData: Partial<AppContextType['trialInfo']>) => {
+    try {
+      const updatedTrialInfo = { ...trialInfo, ...trialData };
+      await dbService.updateTrialInfo(updatedTrialInfo);
+      setTrialInfo(updatedTrialInfo);
+    } catch (error) {
+      console.error('Error updating trial info:', error);
+      toast({
+        title: 'Error updating subscription',
+        description: 'There was an error updating your subscription status. Please try again.',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -408,7 +429,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     maintenanceLogs,
     getMaintenanceLogsForTask,
     isLoading,
-    refreshData
+    refreshData,
+    updateTrialInfo
   };
 
   return (

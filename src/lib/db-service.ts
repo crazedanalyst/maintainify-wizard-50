@@ -77,6 +77,14 @@ export type MaintenanceLog = {
   updatedAt: number;
 };
 
+export type TrialInfo = {
+  startDate: number;
+  endDate: number;
+  isActive: boolean;
+  daysLeft: number;
+  isPro?: boolean;
+};
+
 // Define database schema
 export type Schema = {
   properties: Property[];
@@ -84,11 +92,7 @@ export type Schema = {
   warranties: Warranty[];
   serviceProviders: ServiceProvider[];
   maintenanceLogs: MaintenanceLog[];
-  trialInfo: {
-    startDate: number;
-    endDate: number;
-    isActive: boolean;
-  };
+  trialInfo: TrialInfo;
 };
 
 const DB_NAME = 'homeMaintenance';
@@ -132,7 +136,8 @@ class DBService {
             id: 'trial',
             startDate: now,
             endDate: now + 14 * 24 * 60 * 60 * 1000, // 14 days in milliseconds
-            isActive: true
+            isActive: true,
+            isPro: false
           });
         }
       };
@@ -245,12 +250,35 @@ class DBService {
     });
   }
 
-  // Check trial status
-  async getTrialStatus(): Promise<{ isActive: boolean, daysLeft: number, startDate: number, endDate: number }> {
+  // Update trial info
+  async updateTrialInfo(trialInfo: Partial<TrialInfo>): Promise<void> {
     if (!this.db) await this.init();
     
     try {
-      const trial = await this.getById('trialInfo', 'trial') as { startDate: number, endDate: number, isActive: boolean };
+      const currentTrialInfo = await this.getById<TrialInfo & { id: string }>('trialInfo', 'trial');
+      
+      if (!currentTrialInfo) {
+        throw new Error('Trial info not found');
+      }
+      
+      const updatedTrialInfo = {
+        ...currentTrialInfo,
+        ...trialInfo
+      };
+      
+      await this.update('trialInfo', updatedTrialInfo);
+    } catch (error) {
+      console.error('Error updating trial info:', error);
+      throw error;
+    }
+  }
+
+  // Check trial status
+  async getTrialStatus(): Promise<TrialInfo> {
+    if (!this.db) await this.init();
+    
+    try {
+      const trial = await this.getById<TrialInfo & { id: string }>('trialInfo', 'trial');
       
       if (!trial) {
         // If no trial info, create it
@@ -259,17 +287,32 @@ class DBService {
           id: 'trial',
           startDate: now,
           endDate: now + 14 * 24 * 60 * 60 * 1000, // 14 days
-          isActive: true
+          isActive: true,
+          daysLeft: 14,
+          isPro: false
         };
         await this.add('trialInfo', newTrial);
         return { 
           isActive: true, 
           daysLeft: 14,
           startDate: now,
-          endDate: newTrial.endDate
+          endDate: newTrial.endDate,
+          isPro: false
         };
       }
       
+      // If user has Pro, return the status
+      if (trial.isPro) {
+        return {
+          isActive: true,
+          daysLeft: 0,
+          startDate: trial.startDate,
+          endDate: trial.endDate,
+          isPro: true
+        };
+      }
+      
+      // For free trial users
       const now = Date.now();
       const daysLeft = Math.max(0, Math.ceil((trial.endDate - now) / (1000 * 60 * 60 * 24)));
       const isActive = now <= trial.endDate;
@@ -284,7 +327,8 @@ class DBService {
         isActive, 
         daysLeft,
         startDate: trial.startDate,
-        endDate: trial.endDate
+        endDate: trial.endDate,
+        isPro: false
       };
     } catch (error) {
       console.error('Error getting trial status:', error);
@@ -293,7 +337,8 @@ class DBService {
         isActive: false, 
         daysLeft: 0,
         startDate: 0,
-        endDate: 0
+        endDate: 0,
+        isPro: false
       };
     }
   }
