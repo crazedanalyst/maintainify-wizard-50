@@ -1,11 +1,11 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import dbService, { 
   Property, 
   MaintenanceTask, 
   Warranty, 
   ServiceProvider, 
-  MaintenanceLog 
+  MaintenanceLog,
+  TrialInfo
 } from '@/lib/db-service';
 import notificationService from '@/lib/notification-service';
 import { generateId } from '@/lib/utils';
@@ -81,11 +81,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const initialize = async () => {
       try {
         await dbService.init();
-        // Check if it's the first run and initialize demo data
         await dbService.initDemoData();
-        // Load data
         await refreshData();
-        // Request notification permission
         notificationService.requestPermission();
       } catch (error) {
         console.error('Error initializing app:', error);
@@ -106,32 +103,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const refreshData = async () => {
     setIsLoading(true);
     try {
-      // Get trial status
       const trial = await dbService.getTrialStatus();
-      setTrialInfo(trial);
+      setTrialInfo({
+        ...trial,
+        isPro: trial.isPro ?? false
+      });
       
-      // Get properties
       const propertiesData = await dbService.getAll<Property>('properties');
       setProperties(propertiesData);
       
-      // Select the first property if none is selected
       if (propertiesData.length > 0 && !selectedProperty) {
         setSelectedProperty(propertiesData[0]);
       }
       
-      // Get maintenance tasks
       const tasksData = await dbService.getAll<MaintenanceTask>('maintenanceTasks');
       setMaintenanceTasks(tasksData);
       
-      // Get warranties
       const warrantiesData = await dbService.getAll<Warranty>('warranties');
       setWarranties(warrantiesData);
       
-      // Get service providers
       const providersData = await dbService.getAll<ServiceProvider>('serviceProviders');
       setServiceProviders(providersData);
       
-      // Get maintenance logs
       const logsData = await dbService.getAll<MaintenanceLog>('maintenanceLogs');
       setMaintenanceLogs(logsData);
     } catch (error) {
@@ -190,11 +183,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteProperty = async (id: string) => {
     await dbService.delete('properties', id);
-    // Also delete all related data
     const tasksToDelete = maintenanceTasks.filter(task => task.propertyId === id);
     for (const task of tasksToDelete) {
       await dbService.delete('maintenanceTasks', task.id);
-      // Delete related logs
       const logsToDelete = maintenanceLogs.filter(log => log.taskId === task.id);
       for (const log of logsToDelete) {
         await dbService.delete('maintenanceLogs', log.id);
@@ -208,7 +199,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     await refreshData();
     
-    // If the deleted property was selected, select another one
     if (selectedProperty?.id === id) {
       const remainingProperties = properties.filter(p => p.id !== id);
       setSelectedProperty(remainingProperties.length > 0 ? remainingProperties[0] : null);
@@ -228,7 +218,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const addedTask = await dbService.add<MaintenanceTask>('maintenanceTasks', newTask);
     await refreshData();
     
-    // Schedule a notification for the task
     if (addedTask.nextDue) {
       notificationService.scheduleNotification(
         'Maintenance Task Due Soon',
@@ -236,7 +225,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           body: `Task "${addedTask.title}" is due soon.`,
           icon: '/favicon.ico'
         },
-        addedTask.nextDue - 2 * 24 * 60 * 60 * 1000 // 2 days before due date
+        addedTask.nextDue - 2 * 24 * 60 * 60 * 1000
       );
     }
     
@@ -256,7 +245,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteMaintenanceTask = async (id: string) => {
     await dbService.delete('maintenanceTasks', id);
-    // Also delete related logs
     const logsToDelete = maintenanceLogs.filter(log => log.taskId === id);
     for (const log of logsToDelete) {
       await dbService.delete('maintenanceLogs', log.id);
@@ -265,7 +253,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const completeMaintenanceTask = async (taskId: string, logData: Omit<MaintenanceLog, 'id' | 'createdAt' | 'updatedAt'>) => {
-    // Get the task
     const task = maintenanceTasks.find(t => t.id === taskId);
     if (!task) {
       throw new Error('Task not found');
@@ -273,7 +260,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     const now = Date.now();
     
-    // Create maintenance log
     const newLog: MaintenanceLog = {
       ...logData,
       id: generateId(),
@@ -284,7 +270,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     await dbService.add<MaintenanceLog>('maintenanceLogs', newLog);
     
-    // Update the task with new lastCompleted and nextDue dates
     const nextDue = new Date(logData.completedDate);
     switch (task.frequency.unit) {
       case 'days':
@@ -311,14 +296,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await dbService.update<MaintenanceTask>('maintenanceTasks', updatedTask);
     await refreshData();
     
-    // Schedule a notification for the next due date
     notificationService.scheduleNotification(
       'Maintenance Task Due Soon',
       { 
         body: `Task "${updatedTask.title}" is due soon.`,
         icon: '/favicon.ico'
       },
-      updatedTask.nextDue - 2 * 24 * 60 * 60 * 1000 // 2 days before due date
+      updatedTask.nextDue - 2 * 24 * 60 * 60 * 1000
     );
   };
 
@@ -335,9 +319,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const addedWarranty = await dbService.add<Warranty>('warranties', newWarranty);
     await refreshData();
     
-    // Schedule a notification for warranty expiration
     const notificationDate = new Date(addedWarranty.expiryDate);
-    notificationDate.setDate(notificationDate.getDate() - 30); // 30 days before expiry
+    notificationDate.setDate(notificationDate.getDate() - 30);
     
     if (notificationDate.getTime() > now) {
       notificationService.scheduleNotification(
