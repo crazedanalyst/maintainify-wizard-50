@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
 import Stripe from 'https://esm.sh/stripe@14.21.0'
 
@@ -60,22 +59,12 @@ Deno.serve(async (req) => {
       case 'create-checkout': {
         console.log('Creating checkout session for user:', userId, userData.user.email)
         
-        // Create a checkout session with Stripe using price data directly
+        // Create a checkout session with Stripe using the specific price ID
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ['card'],
           line_items: [
             {
-              price_data: {
-                currency: 'usd',
-                product_data: {
-                  name: 'Pro Plan Subscription',
-                  description: 'Monthly subscription for Pro features',
-                },
-                unit_amount: 999, // $9.99
-                recurring: {
-                  interval: 'month',
-                },
-              },
+              price: 'price_1R4Lx0GdqeaUEdYJ0x648bXG', // Using the provided price ID
               quantity: 1,
             },
           ],
