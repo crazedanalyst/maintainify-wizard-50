@@ -38,14 +38,13 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Get the user from Supabase
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single()
+    // Get user email from auth.users instead of a custom users table
+    const { data: userData, error: userError } = await supabase
+      .auth
+      .admin
+      .getUserById(userId)
 
-    if (userError) {
+    if (userError || !userData) {
       console.error('Error fetching user:', userError)
       return new Response(
         JSON.stringify({ error: 'User not found' }),
@@ -79,7 +78,7 @@ Deno.serve(async (req) => {
           success_url: `${returnUrl}?success=true&session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${returnUrl}?canceled=true`,
           client_reference_id: userId,
-          customer_email: user.email,
+          customer_email: userData.user.email,
           metadata: {
             userId: userId,
           },
@@ -95,9 +94,27 @@ Deno.serve(async (req) => {
       }
       
       case 'check-subscription': {
+        // First, try to find customer for this user
+        const customers = await stripe.customers.list({
+          email: userData.user.email,
+          limit: 1,
+        })
+        
+        // If customer doesn't exist, they don't have a subscription
+        if (customers.data.length === 0) {
+          return new Response(
+            JSON.stringify({ active: false, subscription: null }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+        
         // Check subscription status in Stripe
+        const customerId = customers.data[0].id
         const subscriptions = await stripe.subscriptions.list({
-          customer: userId, // Assuming userId is used as the customer ID in Stripe
+          customer: customerId,
           status: 'active',
           limit: 1,
         })
@@ -138,9 +155,27 @@ Deno.serve(async (req) => {
       }
       
       case 'cancel-subscription': {
-        // Get active subscriptions for the user
+        // First, try to find customer for this user
+        const customers = await stripe.customers.list({
+          email: userData.user.email,
+          limit: 1,
+        })
+        
+        // If customer doesn't exist, they don't have a subscription
+        if (customers.data.length === 0) {
+          return new Response(
+            JSON.stringify({ error: 'No active subscription found' }),
+            { 
+              status: 404, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+        
+        // Get active subscriptions for the customer
+        const customerId = customers.data[0].id
         const subscriptions = await stripe.subscriptions.list({
-          customer: userId,
+          customer: customerId,
           status: 'active',
           limit: 1,
         })
