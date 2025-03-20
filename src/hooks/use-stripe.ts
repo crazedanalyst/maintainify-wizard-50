@@ -1,7 +1,12 @@
 
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { createCheckoutSession, checkSubscriptionStatus, cancelSubscription } from '@/lib/stripe-service';
+import { 
+  createCheckoutSession, 
+  checkSubscriptionStatus, 
+  cancelSubscription,
+  syncSubscriptionStatus 
+} from '@/lib/stripe-service';
 
 export function useStripe() {
   const [isLoading, setIsLoading] = useState(false);
@@ -73,11 +78,31 @@ export function useStripe() {
       setIsLoading(false);
     }
   };
+  
+  // Function to sync subscription status with database
+  const syncSubscription = async (userId: string) => {
+    setIsLoading(true);
+    try {
+      const result = await syncSubscriptionStatus(userId);
+      return result;
+    } catch (error) {
+      console.error('Error syncing subscription:', error);
+      toast({
+        title: 'Sync Error',
+        description: 'There was an error syncing your subscription status.',
+        variant: 'destructive'
+      });
+      return { synced: false, hasSubscription: false };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
     isLoading,
     redirectToCheckout,
     checkSubscription,
-    handleCancelSubscription
+    handleCancelSubscription,
+    syncSubscription
   };
 }

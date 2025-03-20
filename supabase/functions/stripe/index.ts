@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
 import Stripe from 'https://esm.sh/stripe@14.21.0'
 
@@ -136,6 +137,15 @@ Deno.serve(async (req) => {
             end_date: subscription.current_period_end * 1000, // Convert to milliseconds
             is_pro: true
           })
+        } else {
+          // No active subscription found, update database accordingly
+          await supabase.rpc('update_trial_info', {
+            user_id: userId,
+            is_active: false,
+            days_left: 0,
+            end_date: 0,
+            is_pro: false
+          })
         }
 
         return new Response(
@@ -192,6 +202,16 @@ Deno.serve(async (req) => {
           { cancel_at_period_end: true }
         )
 
+        // Update the database to reflect that the subscription will be canceled
+        await supabase.rpc('update_trial_info', {
+          user_id: userId,
+          is_active: true, // Still active until the period ends
+          days_left: 0,
+          end_date: subscription.current_period_end * 1000, // Convert to milliseconds
+          is_pro: true, // Still pro until the period ends
+          cancel_at_period_end: true // Mark as scheduled for cancellation
+        })
+
         return new Response(
           JSON.stringify({ 
             success: true, 
@@ -201,6 +221,102 @@ Deno.serve(async (req) => {
               cancelAtPeriodEnd: subscription.cancel_at_period_end,
               currentPeriodEnd: subscription.current_period_end,
             } 
+          }),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+
+      case 'sync-subscription': {
+        console.log('Syncing subscription status for user:', userId, userData.user.email)
+        
+        // First, try to find customer for this user
+        const customers = await stripe.customers.list({
+          email: userData.user.email,
+          limit: 1,
+        })
+        
+        // If customer doesn't exist, they don't have a subscription
+        if (customers.data.length === 0) {
+          // Update database to reflect no subscription
+          await supabase.rpc('update_trial_info', {
+            user_id: userId,
+            is_active: false,
+            days_left: 0,
+            end_date: 0,
+            is_pro: false,
+            cancel_at_period_end: false
+          })
+
+          return new Response(
+            JSON.stringify({ 
+              synced: true, 
+              hasSubscription: false 
+            }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+        
+        // Check for active subscriptions
+        const customerId = customers.data[0].id
+        const subscriptions = await stripe.subscriptions.list({
+          customer: customerId,
+          limit: 1,
+        })
+
+        if (subscriptions.data.length === 0) {
+          // No subscriptions at all
+          await supabase.rpc('update_trial_info', {
+            user_id: userId,
+            is_active: false,
+            days_left: 0,
+            end_date: 0,
+            is_pro: false,
+            cancel_at_period_end: false
+          })
+
+          return new Response(
+            JSON.stringify({ 
+              synced: true, 
+              hasSubscription: false 
+            }),
+            { 
+              status: 200, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+
+        // We have a subscription (active or not)
+        const subscription = subscriptions.data[0]
+        const isActive = subscription.status === 'active' || 
+                         subscription.status === 'trialing';
+        
+        await supabase.rpc('update_trial_info', {
+          user_id: userId,
+          is_active: isActive,
+          days_left: 0,
+          end_date: subscription.current_period_end * 1000, // Convert to milliseconds
+          is_pro: isActive,
+          cancel_at_period_end: subscription.cancel_at_period_end
+        })
+
+        return new Response(
+          JSON.stringify({ 
+            synced: true, 
+            hasSubscription: true,
+            isActive: isActive,
+            subscription: {
+              id: subscription.id,
+              status: subscription.status,
+              currentPeriodEnd: subscription.current_period_end,
+              cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            }
           }),
           { 
             status: 200, 

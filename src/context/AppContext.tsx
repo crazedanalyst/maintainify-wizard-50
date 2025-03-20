@@ -11,55 +11,46 @@ import notificationService from '@/lib/notification-service';
 import { generateId } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useStripe } from '@/hooks/use-stripe';
 
-// Define the context type
 interface AppContextType {
-  // Trial information
   trialInfo: {
     isActive: boolean;
     daysLeft: number;
     startDate: number;
     endDate: number;
     isPro?: boolean;
+    cancelAtPeriodEnd?: boolean;
   };
-  // Properties
   properties: Property[];
   selectedProperty: Property | null;
   setSelectedProperty: (property: Property | null) => void;
   addProperty: (property: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Property>;
   updateProperty: (property: Property) => Promise<Property>;
   deleteProperty: (id: string) => Promise<void>;
-  // Maintenance tasks
   maintenanceTasks: MaintenanceTask[];
   addMaintenanceTask: (task: Omit<MaintenanceTask, 'id' | 'createdAt' | 'updatedAt'>) => Promise<MaintenanceTask>;
   updateMaintenanceTask: (task: MaintenanceTask) => Promise<MaintenanceTask>;
   deleteMaintenanceTask: (id: string) => Promise<void>;
   completeMaintenanceTask: (taskId: string, logData: Omit<MaintenanceLog, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  // Warranties
   warranties: Warranty[];
   addWarranty: (warranty: Omit<Warranty, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Warranty>;
   updateWarranty: (warranty: Warranty) => Promise<Warranty>;
   deleteWarranty: (id: string) => Promise<void>;
-  // Service providers
   serviceProviders: ServiceProvider[];
   addServiceProvider: (provider: Omit<ServiceProvider, 'id' | 'createdAt' | 'updatedAt'>) => Promise<ServiceProvider>;
   updateServiceProvider: (provider: ServiceProvider) => Promise<ServiceProvider>;
   deleteServiceProvider: (id: string) => Promise<void>;
-  // Maintenance logs
   maintenanceLogs: MaintenanceLog[];
   getMaintenanceLogsForTask: (taskId: string) => MaintenanceLog[];
-  // Loading state
   isLoading: boolean;
-  // Refresh data
   refreshData: () => Promise<void>;
-  // Update trial info
   updateTrialInfo: (trialData: Partial<AppContextType['trialInfo']>) => Promise<void>;
+  syncSubscriptionStatus: (userId: string) => Promise<void>;
 }
 
-// Create the context
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Provider component
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [trialInfo, setTrialInfo] = useState({
@@ -67,7 +58,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     daysLeft: 14,
     startDate: Date.now(),
     endDate: Date.now() + 14 * 24 * 60 * 60 * 1000,
-    isPro: false
+    isPro: false,
+    cancelAtPeriodEnd: false
   });
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -75,8 +67,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [warranties, setWarranties] = useState<Warranty[]>([]);
   const [serviceProviders, setServiceProviders] = useState<ServiceProvider[]>([]);
   const [maintenanceLogs, setMaintenanceLogs] = useState<MaintenanceLog[]>([]);
+  
+  const { syncSubscription } = useStripe();
 
-  // Initialize data
   useEffect(() => {
     const initialize = async () => {
       try {
@@ -99,14 +92,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     initialize();
   }, []);
 
-  // Refresh all data from database
   const refreshData = async () => {
     setIsLoading(true);
     try {
       const trial = await dbService.getTrialStatus();
       setTrialInfo({
         ...trial,
-        isPro: trial.isPro ?? false
+        isPro: trial.isPro ?? false,
+        cancelAtPeriodEnd: trial.cancelAtPeriodEnd ?? false
       });
       
       const propertiesData = await dbService.getAll<Property>('properties');
@@ -139,7 +132,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Update trial info
   const updateTrialInfo = async (trialData: Partial<AppContextType['trialInfo']>) => {
     try {
       const updatedTrialInfo = { ...trialInfo, ...trialData };
@@ -155,7 +147,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Properties CRUD operations
+  const syncSubscriptionStatus = async (userId: string) => {
+    try {
+      setIsLoading(true);
+      const result = await syncSubscription(userId);
+      
+      if (result.synced) {
+        await refreshData();
+        
+        if (result.hasSubscription && result.isActive) {
+          toast({
+            title: 'Subscription Active',
+            description: result.subscription?.cancelAtPeriodEnd 
+              ? 'Your subscription is active but will be canceled at the end of the billing period.' 
+              : 'Your subscription is active.',
+          });
+        } else {
+          toast({
+            title: 'No Active Subscription',
+            description: 'You don\'t have an active subscription.',
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing subscription status:', error);
+      toast({
+        title: 'Sync Error',
+        description: 'There was an error syncing your subscription status.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const addProperty = async (propertyData: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = Date.now();
     const newProperty: Property = {
@@ -205,7 +230,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Maintenance tasks CRUD operations
   const addMaintenanceTask = async (taskData: Omit<MaintenanceTask, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = Date.now();
     const newTask: MaintenanceTask = {
@@ -306,7 +330,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  // Warranties CRUD operations
   const addWarranty = async (warrantyData: Omit<Warranty, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = Date.now();
     const newWarranty: Warranty = {
@@ -352,7 +375,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await refreshData();
   };
 
-  // Service providers CRUD operations
   const addServiceProvider = async (providerData: Omit<ServiceProvider, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = Date.now();
     const newProvider: ServiceProvider = {
@@ -383,7 +405,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await refreshData();
   };
 
-  // Get maintenance logs for a specific task
   const getMaintenanceLogsForTask = (taskId: string) => {
     return maintenanceLogs.filter(log => log.taskId === taskId);
   };
@@ -413,7 +434,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     getMaintenanceLogsForTask,
     isLoading,
     refreshData,
-    updateTrialInfo
+    updateTrialInfo,
+    syncSubscriptionStatus
   };
 
   return (
@@ -423,7 +445,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 };
 
-// Custom hook to use the context
 export const useApp = () => {
   const context = useContext(AppContext);
   if (context === undefined) {

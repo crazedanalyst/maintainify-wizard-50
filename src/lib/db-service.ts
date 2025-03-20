@@ -1,4 +1,3 @@
-
 // Simple storage service using IndexedDB for local data storage
 
 // Define property types
@@ -83,6 +82,7 @@ export type TrialInfo = {
   isActive: boolean;
   daysLeft: number;
   isPro?: boolean;
+  cancelAtPeriodEnd?: boolean;
 };
 
 // Define database schema
@@ -137,7 +137,8 @@ class DBService {
             startDate: now,
             endDate: now + 14 * 24 * 60 * 60 * 1000, // 14 days in milliseconds
             isActive: true,
-            isPro: false
+            isPro: false,
+            cancelAtPeriodEnd: false
           });
         }
       };
@@ -289,7 +290,8 @@ class DBService {
           endDate: now + 14 * 24 * 60 * 60 * 1000, // 14 days
           isActive: true,
           daysLeft: 14,
-          isPro: false
+          isPro: false,
+          cancelAtPeriodEnd: false
         };
         await this.add('trialInfo', newTrial);
         return { 
@@ -297,7 +299,8 @@ class DBService {
           daysLeft: 14,
           startDate: now,
           endDate: newTrial.endDate,
-          isPro: false
+          isPro: false,
+          cancelAtPeriodEnd: false
         };
       }
       
@@ -308,7 +311,8 @@ class DBService {
           daysLeft: 0,
           startDate: trial.startDate,
           endDate: trial.endDate,
-          isPro: true
+          isPro: true,
+          cancelAtPeriodEnd: trial.cancelAtPeriodEnd || false
         };
       }
       
@@ -328,7 +332,8 @@ class DBService {
         daysLeft,
         startDate: trial.startDate,
         endDate: trial.endDate,
-        isPro: false
+        isPro: false,
+        cancelAtPeriodEnd: trial.cancelAtPeriodEnd || false
       };
     } catch (error) {
       console.error('Error getting trial status:', error);
@@ -338,7 +343,8 @@ class DBService {
         daysLeft: 0,
         startDate: 0,
         endDate: 0,
-        isPro: false
+        isPro: false,
+        cancelAtPeriodEnd: false
       };
     }
   }

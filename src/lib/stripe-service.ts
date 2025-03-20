@@ -15,6 +15,18 @@ interface SubscriptionStatus {
   } | null;
 }
 
+interface SyncSubscriptionResponse {
+  synced: boolean;
+  hasSubscription: boolean;
+  isActive?: boolean;
+  subscription?: {
+    id: string;
+    status: string;
+    currentPeriodEnd: number;
+    cancelAtPeriodEnd: boolean;
+  };
+}
+
 export async function createCheckoutSession(userId: string): Promise<CheckoutResponse> {
   try {
     const { data, error } = await supabase.functions.invoke('stripe', {
@@ -63,6 +75,23 @@ export async function cancelSubscription(userId: string): Promise<boolean> {
     return (data as { success: boolean }).success;
   } catch (error) {
     console.error('Error canceling subscription:', error);
+    throw error;
+  }
+}
+
+export async function syncSubscriptionStatus(userId: string): Promise<SyncSubscriptionResponse> {
+  try {
+    const { data, error } = await supabase.functions.invoke('stripe', {
+      body: {
+        action: 'sync-subscription',
+        userId
+      }
+    });
+
+    if (error) throw new Error(error.message);
+    return data as SyncSubscriptionResponse;
+  } catch (error) {
+    console.error('Error syncing subscription status:', error);
     throw error;
   }
 }
